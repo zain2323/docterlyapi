@@ -18,11 +18,12 @@ def create_app(config=Config):
     app.config.from_object(Config)
     initialize_extensions(app)
     register_blueprints(app)
+
+    from api import models
     return app
 
 def initialize_extensions(app):
     api_fairy.init_app(app)
-    db.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
 
