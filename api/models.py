@@ -1,10 +1,8 @@
 import base64
-from importlib.abc import PathEntryFinder
 import os
-from this import d
 from api import db
 from datetime import datetime, timedelta
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 doctor_specializations = db.Table("doctor_specializations",
     db.Column('doctor_id', db.Integer, db.ForeignKey('doctor.id', ondelete='CASCADE'), primary_key=True, nullable=False),
@@ -72,26 +70,18 @@ class day(db.Model):
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    name = db.Column(db.String(30), nullable=False)
-    email = db.Column(db.String(30), unique=True, nullable=False, index=True)
+    name = db.Column(db.String(64), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password = db.Column(db.String(60), nullable=False)
     registered_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     confirmed = db.Column(db.Boolean, default=False, nullable=False)
     dob = db.Column(db.Date, nullable=False)
     gender = db.Column(db.String(8), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
-    token = db.Column(db.String(32), index=True, unqiue=True)
+    token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
     doctor = db.relationship("Doctor", backref="user", lazy=True)
     patient = db.relationship("Patient", backref="user", lazy=True)
-
-    def __init__(self, name, email, password, dob, gender, role_id):
-        self.name = name
-        self.email = email
-        self.password = self.set_password(password)
-        self.dob = dob
-        self.gender = gender
-        self.role_ide = role_id
     
     def set_password(self, plain_password):
         self.password = self.generate_hashed_password(plain_password)
@@ -107,7 +97,7 @@ class User(db.Model):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             return self.token
-        self.token = base64.encode(os.urandom(24)).decode('utf-8')
+        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
         self.token_expiration = now + timedelta(seconds=expires_in)
         db.session.add(self)
         return self.token

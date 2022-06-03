@@ -7,8 +7,8 @@ from flask_migrate import Migrate
 from api.config import DevelopmentConfig as Config
 
 api_fairy = APIFairy()
-ma = Marshmallow()
 db = SQLAlchemy()
+ma = Marshmallow()
 basic_auth = HTTPBasicAuth()
 token_auth = HTTPTokenAuth()
 migrate = Migrate()
@@ -28,4 +28,8 @@ def initialize_extensions(app):
     migrate.init_app(app, db)
 
 def register_blueprints(app):
-    pass
+    from api.user import user_bp
+    from api.auth import auth_bp
+
+    app.register_blueprint(user_bp, url_prefix="/users")
+    app.register_blueprint(auth_bp, url_prefix="/auth")
