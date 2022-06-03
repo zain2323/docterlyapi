@@ -1,7 +1,9 @@
+import base64
 from importlib.abc import PathEntryFinder
+import os
 from this import d
 from api import db
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
 doctor_specializations = db.Table("doctor_specializations",
@@ -78,6 +80,8 @@ class User(db.Model):
     dob = db.Column(db.Date, nullable=False)
     gender = db.Column(db.String(8), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
+    token = db.Column(db.String(32), index=True, unqiue=True)
+    token_expiration = db.Column(db.DateTime)
     doctor = db.relationship("Doctor", backref="user", lazy=True)
     patient = db.relationship("Patient", backref="user", lazy=True)
 
@@ -91,7 +95,7 @@ class User(db.Model):
     
     def set_password(self, plain_password):
         self.password = self.generate_hashed_password(plain_password)
-
+    
     @staticmethod
     def generate_hashed_password(plain_password):
         return generate_password_hash(plain_password)
@@ -99,6 +103,25 @@ class User(db.Model):
     def verify_password(self,plain_password):
         return check_password_hash(self.password, plain_password)
 
+    def get_token(self, expires_in=3600):
+        now = datetime.utcnow()
+        if self.token and self.token_expiration > now + timedelta(seconds=60):
+            return self.token
+        self.token = base64.encode(os.urandom(24)).decode('utf-8')
+        self.token_expiration = now + timedelta(seconds=expires_in)
+        db.session.add(self)
+        return self.token
+    
+    def revoke_token(self):
+        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
+
+    @staticmethod
+    def verify_token(token):
+        user = User.query.filter_by(token=token).first()
+        if user is None or user.token != token or user.token_expiration < datetime.utcnow():
+            return None
+        return user
+    
     def __repr__(self):
         return f"{self.name}, {self.email}"
     

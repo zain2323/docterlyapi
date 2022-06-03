@@ -10,7 +10,7 @@ api_fairy = APIFairy()
 ma = Marshmallow()
 db = SQLAlchemy()
 basic_auth = HTTPBasicAuth()
-token = HTTPTokenAuth()
+token_auth = HTTPTokenAuth()
 migrate = Migrate()
 
 def create_app(config=Config):
