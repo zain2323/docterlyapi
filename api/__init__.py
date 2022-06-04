@@ -28,8 +28,12 @@ def initialize_extensions(app):
     migrate.init_app(app, db)
 
 def register_blueprints(app):
-    from api.user import user_bp
-    from api.auth import auth_bp
+    from api.user import users
+    from api.auth import auth
+    from api.doctor import doctor
+    from api.patient import patient
 
-    app.register_blueprint(user_bp, url_prefix="/users")
-    app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(users, url_prefix="/users")
+    app.register_blueprint(auth, url_prefix="/auth")
+    app.register_blueprint(doctor, url_prefix="/doctor")
+    app.register_blueprint(patient, url_prefix="/patient")

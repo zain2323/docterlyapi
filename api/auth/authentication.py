@@ -5,11 +5,8 @@ from werkzeug.exceptions import Forbidden, Unauthorized
 @basic_auth.verify_password
 def verify_password(email , password):
     user = User.query.filter_by(email=email).first()
-    print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-    print(email, password)
     if user is None:
         return None
-    print(user)
     if user.verify_password(password):
         return user
 

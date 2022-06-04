@@ -23,9 +23,21 @@ import json
 class DevelopmentConfig:
     FLASK_ENV = "development"
     SECRET_KEY = "'0035ce4c6d1f0d6f327d97051b9bcfafc7d922b2ce06c4f7dbff5ee4d159b50f'"
+    APIFAIRY_TITLE = 'Doctorly API'
     APIFAIRY_VERSION = '0.1'
     APIFAIRY_UI = 'elements'
     FLASK_DEBUG = True
     TESTING = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///data.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+class PostgresqlTestingConfig:
+    FLASK_ENV = "development"
+    SECRET_KEY = "'0035ce4c6d1f0d6f327d97051b9bcfafc7d922b2ce06c4f7dbff5ee4d159b50f'"
+    APIFAIRY_TITLE = 'Doctorly API'
+    APIFAIRY_VERSION = '0.1'
+    APIFAIRY_UI = 'elements'
+    FLASK_DEBUG = True
+    TESTING = False
+    SQLALCHEMY_DATABASE_URI = 'postgresql://doctorly_user:doctorly@localhost/doctorly_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False

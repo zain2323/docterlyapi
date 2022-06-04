@@ -27,9 +27,6 @@ class Role(db.Model):
     role_name = db.Column(db.String(20), index=True, unique=True, default="user", nullable=False)
     user = db.relationship("User", backref="role", lazy=True) 
 
-    def __init__(self, role_name):
-        self.role_name = role_name
-
     def __repr__(self):
         return f"{self.role_name}"
 
@@ -37,9 +34,6 @@ class Specialization(db.Model):
     __tablename__ = "specialization"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique=True, nullable=True, index=True)
-
-    def __init__(self, name):
-        self.name = name
 
     def __repr__(self):
         return f"{self.name}"
@@ -49,9 +43,6 @@ class Qualification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), unique=True, index=True, nullable=False)
 
-    def __init__(self, name):
-        self.name = name
-
     def __repr__(self):
         return f"{self.name}"
 
@@ -60,9 +51,6 @@ class day(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(10), unique=True, nullable=False, index=True)
     slot = db.relationship("Slot", backref="day", lazy=True)
-
-    def __init__(self, name):
-        self.name = name
 
     def __repr__(self):
         return f"{self.name}"
@@ -135,10 +123,6 @@ class Doctor(db.Model):
     secondaryjoin=(doctor_qualifications.c.qualification_id == Qualification.id),
     backref=db.backref("doctor", lazy='dynamic'), lazy='dynamic', cascade="all, delete")
 
-    def __init__(self, user_id, description):
-        self.user_id = user_id
-        self.description = description
-    
     def __repr__(self):
         return f"doctor:id {self.id}"
 
@@ -148,10 +132,6 @@ class Prescription(db.Model):
     appointment_id = db.Column(db.Integer, db.ForeignKey("appointment.id"), nullable=False)
     description = db.Column(db.String, nullable=False)
     prescribed_medicines = db.relationship("PrescribedMedicines", backref="prescription", lazy=True)
-
-    def __init__(self, appointment_id, description):
-        self.appointment_id = appointment_id
-        self.description = description
 
     def __repr__(self):
         return f"appointment_id: {self.appointment_id}, description: {self.description}"
@@ -171,12 +151,6 @@ class Patient(db.Model):
         secondaryjoin = (medical_history.c.prescription_id == Prescription.id),
         backref=db.backref("patient", lazy="dynamic", cascade="all, delete")
     )
-
-    def __init__(self, user_id, name, dob, gender):
-        self.user_id = user_id
-        self.name = name
-        self.dob = dob
-        self.gender = gender
     
     def __repr__(self):
         return f"Name: {self.name}"
@@ -192,12 +166,6 @@ class Rating(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     review = db.Column(db.String, nullable=False)
 
-    def __init__(self, doctor_id, patient_id, rating, review):
-        self.doctor_id = doctor_id
-        self.patient_id = patient_id
-        self.rating = rating
-        self.review = review 
-        
     def __repr__(self):
         return f"'Doctor Id: {self.doctor_id}, Patient Id: {self.patient_id}, Rating: {self.rating}, Review: {self.review}"
 
@@ -211,11 +179,6 @@ class Appointment(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     prescription = db.relationship("Prescription", backref="appointment", lazy=True)
-
-    def __init__(self, slot_id, patient_id, date):
-        self.slot_id = slot_id
-        self.patient_id = patient_id
-        self.date = date
 
     def __repr__(self):
         return f"slot_id: {self.slot_id}, patient_id:{self.patient_id}, date:{self.date}"
@@ -233,16 +196,6 @@ class Slot(db.Model):
     num_slots = db.Column(db.Integer, nullable=False)
     appointment = db.relationship("Appointment", backref="slot", lazy=True)
     
-    def __init__(self, day_id, doctor_id, start, end, consultation_fee, room_number, appointment_duration, num_slots):
-        self.day_id = day_id
-        self.doctor_id = doctor_id  
-        self.start = start
-        self.end = end
-        self.consultation_fee = consultation_fee
-        self.room_number = room_number
-        self.appointment_duration = appointment_duration
-        self.num_slots= num_slots
-    
     def __repr__(self):
         return f"Start: {self.start}, End: {self.end}"
 
@@ -255,12 +208,5 @@ class PrescribedMedicines(db.Model):
     dosage = db.Column(db.String, nullable=False)
     brand = db.Column(db.String, nullable=False)
 
-    def __init__(self, prescription_id, medicine_name, medicine_formula, dosage, brand):
-        self.prescription_id = prescription_id
-        self.medicine_name = medicine_name
-        self.medicine_formula = medicine_formula
-        self.dosage = dosage
-        self.brand = brand
-    
     def __repr__(self):
         return f"Medicine: {self.medicine_name}, Dosage: {self.dosage}"
