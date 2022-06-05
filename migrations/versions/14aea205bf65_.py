@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: f28e0474064e
+Revision ID: 14aea205bf65
 Revises: 
-Create Date: 2022-06-01 12:26:23.501142
+Create Date: 2022-06-04 01:56:45.036437
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f28e0474064e'
+revision = '14aea205bf65'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -38,24 +38,27 @@ def upgrade():
     op.create_index(op.f('ix_role_role_name'), 'role', ['role_name'], unique=True)
     op.create_table('specialization',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=30), nullable=True),
+    sa.Column('name', sa.String(length=30), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_specialization_name'), 'specialization', ['name'], unique=True)
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=30), nullable=False),
-    sa.Column('email', sa.String(length=30), nullable=False),
+    sa.Column('name', sa.String(length=64), nullable=False),
+    sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('password', sa.String(length=60), nullable=False),
     sa.Column('registered_at', sa.DateTime(), nullable=False),
     sa.Column('confirmed', sa.Boolean(), nullable=False),
     sa.Column('dob', sa.Date(), nullable=False),
     sa.Column('gender', sa.String(length=8), nullable=False),
     sa.Column('role_id', sa.Integer(), nullable=False),
+    sa.Column('token', sa.String(length=32), nullable=True),
+    sa.Column('token_expiration', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['role_id'], ['role.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
+    op.create_index(op.f('ix_user_token'), 'user', ['token'], unique=True)
     op.create_table('doctor',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(), nullable=False),
@@ -162,6 +165,7 @@ def downgrade():
     op.drop_table('doctor_qualfications')
     op.drop_table('patient')
     op.drop_table('doctor')
+    op.drop_index(op.f('ix_user_token'), table_name='user')
     op.drop_index(op.f('ix_user_email'), table_name='user')
     op.drop_table('user')
     op.drop_index(op.f('ix_specialization_name'), table_name='specialization')

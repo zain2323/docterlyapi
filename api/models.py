@@ -3,6 +3,7 @@ import os
 from api import db
 from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash, generate_password_hash
+from collections import OrderedDict
 
 doctor_specializations = db.Table("doctor_specializations",
     db.Column('doctor_id', db.Integer, db.ForeignKey('doctor.id', ondelete='CASCADE'), primary_key=True, nullable=False),
@@ -33,7 +34,7 @@ class Role(db.Model):
 class Specialization(db.Model):
     __tablename__ = "specialization"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), unique=True, nullable=True, index=True)
+    name = db.Column(db.String(30), unique=True, nullable=False, index=True)
 
     def __repr__(self):
         return f"{self.name}"
@@ -125,6 +126,15 @@ class Doctor(db.Model):
 
     def __repr__(self):
         return f"doctor:id {self.id}"
+    
+    def get_specializations(self):
+        return self.specializations.all()
+    
+    def get_qualifications(self):
+        return self.qualifications.all()
+    
+    def get_user(self):
+        return self.user
 
 class Prescription(db.Model):
     __tablename__ = "prescription"

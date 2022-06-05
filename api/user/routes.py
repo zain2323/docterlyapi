@@ -20,7 +20,7 @@ def register(kwargs):
 @authenticate(token_auth)
 @response(UserSchema, 200)
 def get_account_info():
-    """Displays the account info of the currently logged in user"""
+    """Get the currently authenticated user's info"""
     return token_auth.current_user()
 
 

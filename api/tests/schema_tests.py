@@ -13,3 +13,10 @@ user = '''{
 
 loaded_user = user_schema.load(user)
 print(loaded_user)
+
+from api.models import *
+from api.doctor.schema import *
+
+doctor = Doctor.query.all()[-1]
+ds = DoctorSchema()
+print(ds.dump(doctor))

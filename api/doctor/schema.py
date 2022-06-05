@@ -1,18 +1,20 @@
 from distutils.command.config import dump_file
-from telnetlib import DO
 from api import ma, token_auth
 from api.models import Doctor, User
-from marshmallow import validate, validates, ValidationError
+from marshmallow import validate, validates, ValidationError, fields
+from api.admin.schema import SpecializationSchema, QualificationSchema
+from api.user.schema import UserSchema
+
 
 class CreateNewDoctorSchema(ma.SQLAlchemySchema):
-    """Scema defining the attributes when registering as a doctor"""
+    """Schema defining the attributes when registering as a doctor"""
     class Meta:
         ordered = True
-
     name = ma.String(required=True, validate=[validate.Length(min=3, max=64)])
     email = ma.String(required=True, validate=[validate.Length(max=120), validate.Email()])
     password = ma.String(reqired=True, validate=validate.Length(min=8), load_only=True)
     dob = ma.Date(required=True)
+    registered_at = ma.DateTime(dump_only=True)
     gender = ma.String(required=True, validate=[validate.Length(max=8)])
     role_id = ma.Integer(required=True)
     description = ma.String(required=True)
@@ -33,15 +35,13 @@ class CreateNewDoctorSchema(ma.SQLAlchemySchema):
         if not value[0].isalpha():
             raise ValidationError("Email must start with a letter")
 
-class DoctorSchema(ma.SQLAlchemySchema):
+class DoctorSchema(ma.SQLAlchemyAutoSchema):
     """Schema defining the attributes of the doctor"""
     class Meta:
+        model = Doctor
         ordered = True
-    name = ma.String()
-    email = ma.String()
-    dob = ma.String()
-    gender = ma.String()
-    rating = ma.Integer()
-    description = ma.String()
-    specialization = ma.List()
-    qualfications = ma.List()
+    id = ma.auto_field(dump_only=True)
+    user = fields.Nested(UserSchema())
+    description = ma.auto_field(required=True, dump_only=True)
+    specializations = fields.Nested(SpecializationSchema())
+    qualifications = fields.Nested(QualificationSchema())
