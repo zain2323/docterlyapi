@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% block content%}
+    <div class="content-section">
+        <form class="form-group" method="POST" action="">
+            {{ form.hidden_tag() }}
+            <legend class="text-center mt-5">Sign Up</legend>
+            <fieldset class="form-group">
+                <div class="form-group">
+                    {{form.name.label(class="form-control-label mb-2")}}
+                    {% if form.name.errors %}
+                        {{form.name(class="form-control mb-2 is-invalid")}} 
+                        <div class="invalid-feedback">
+                            {% for error in form.name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{form.name(class="form-control mb-2")}}       
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{form.email.label(class="form-control-label mb-2")}}
+                    {% if form.email.errors %}
+                        {{form.email(class="form-control mb-2 is-invalid")}} 
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{form.email(class="form-control mb-2")}}       
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{form.password.label(class="form-control-label mb-2")}}
+                    {% if form.password.errors %}
+                        {{form.password(class="form-control mb-2 is-invalid")}} 
+                        <div class="invalid-feedback">
+                            {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="input-group">
+                            {{form.password(class="form-control mb-2 test")}}
+                            <span style="height: 38px;" class="input-group-text", onclick="toggle_password('password');">
+                            <i class="bi bi-eye-slash-fill" id="show_eye_1"></i>
+                            </span>
+                        </div>    
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{form.confirm_password.label(class="form-control-label mb-2")}}
+                    {% if form.confirm_password.errors %}
+                        {{form.confirm_password(class="form-control mb-2 is-invalid")}} 
+                        <div class="invalid-feedback">
+                            {% for error in form.confirm_password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="input-group">
+                            {{form.confirm_password(class="form-control mb-2 test")}}
+                            <span style="height: 38px;" class="input-group-text", onclick="toggle_password('confirm_password');">
+                            <i class="bi bi-eye-slash-fill" id="show_eye_2"></i>
+                            </span>
+                        </div>         
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group mb-0 text-center">
+                {{ form.submit(class="btn btn-outline-dark mt-4 auth-btn") }}
+            </div>
+            <div class="text-center">
+                <small class="ml-1 mt-0 text-muted">Already a member?
+                    <a href="#" class="link-secondary">Sign In</a>
+                </small>
+            </div>
+        </form>
+    </div>
+    <script>
+        function toggle_password(id)
+        {
+            var password = document.getElementById(id)
+            if (id === "confirm_password")
+            {
+                icon_id = "show_eye_2"
+            }
+            else
+            {
+                icon_id = "show_eye_1"
+            }
+            var icon = document.getElementById(icon_id)
+            if (password.type == "password")
+            {
+                password.type = "text"
+                icon.className = "bi bi-eye-fill"
+            }
+            else
+            {
+                password.type = "password"
+                icon.className = "bi bi-eye-slash-fill"
+            }
+        }
+        </script>
+{% endblock content %}

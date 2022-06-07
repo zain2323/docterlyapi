@@ -2,7 +2,7 @@ from distutils.command.config import dump_file
 from api import ma, token_auth
 from api.models import Doctor, User
 from marshmallow import validate, validates, ValidationError, fields
-from api.admin.schema import SpecializationSchema, QualificationSchema
+from api.webadmin.schema import SpecializationSchema, QualificationSchema
 from api.user.schema import UserSchema
 
 

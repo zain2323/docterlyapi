@@ -1,9 +1,10 @@
 import base64
 import os
-from api import db
+from api import db, login_manager
 from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash, generate_password_hash
 from collections import OrderedDict
+from flask_login.mixins import UserMixin
 
 doctor_specializations = db.Table("doctor_specializations",
     db.Column('doctor_id', db.Integer, db.ForeignKey('doctor.id', ondelete='CASCADE'), primary_key=True, nullable=False),
@@ -47,7 +48,7 @@ class Qualification(db.Model):
     def __repr__(self):
         return f"{self.name}"
 
-class day(db.Model):
+class Day(db.Model):
     __tablename__ = "day"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(10), unique=True, nullable=False, index=True)
@@ -56,7 +57,11 @@ class day(db.Model):
     def __repr__(self):
         return f"{self.name}"
 
-class User(db.Model):
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
+
+class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(64), nullable=False)

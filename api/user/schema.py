@@ -1,7 +1,7 @@
 from api import ma, token_auth
 from marshmallow import validate, validates, validates_schema, ValidationError, post_load, fields
 from api.models import User
-from api.admin.schema import RoleSchema
+from api.webadmin.schema import RoleSchema
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     """Schema defining the attributes of User"""

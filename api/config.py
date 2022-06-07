@@ -26,6 +26,7 @@ class DevelopmentConfig:
     APIFAIRY_TITLE = 'Doctorly API'
     APIFAIRY_VERSION = '0.1'
     APIFAIRY_UI = 'elements'
+    FLASK_ADMIN_SWATCH = 'cyborg'
     FLASK_DEBUG = True
     TESTING = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///data.db'
