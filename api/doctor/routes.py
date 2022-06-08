@@ -2,7 +2,7 @@ from api.models import Doctor, User
 from api import db, basic_auth, token_auth
 from apifairy import response, other_responses, body, authenticate
 from api.doctor import doctor
-from api.doctor.schema import CreateNewDoctorSchema, DoctorSchema
+from api.doctor.schema import CreateNewDoctorSchema, DoctorSchema, doctors_schema
 
 @doctor.route("/new", methods=["POST"])
 @body(CreateNewDoctorSchema)
@@ -26,6 +26,20 @@ def get_current_doctor_info():
     """Get the currently authenticated doctor's info"""
     current_user = token_auth.current_user()
     return Doctor.query.filter_by(user=current_user).first()
+
+@doctor.route("/all", methods=["GET"])
+@authenticate(token_auth)
+@response(doctors_schema)
+def get_all():
+    """Returns all the registered doctors"""
+    return Doctor.query.all()
     
-    
+@doctor.route("/get/<int:id>", methods=["GET"])
+@authenticate(token_auth)
+@response(DoctorSchema)
+@other_responses({404: "Doctor not found"})
+def get_doctor(id):
+    """Get doctor by the id"""
+    return Doctor.query.get_or_404(id)
+
     

@@ -45,3 +45,5 @@ class DoctorSchema(ma.SQLAlchemyAutoSchema):
     description = ma.auto_field(required=True, dump_only=True)
     specializations = fields.Nested(SpecializationSchema())
     qualifications = fields.Nested(QualificationSchema())
+
+doctors_schema = DoctorSchema(many=True)
