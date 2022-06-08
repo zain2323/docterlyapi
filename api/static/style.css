@@ -1,0 +1,176 @@
+.btn:focus {
+    box-shadow: 0 0 0 0.25rem rgba(187, 187, 187, 0.5);
+    border: None
+}
+
+.btn-outline-dark:hover {
+    background-color: rgba(187, 187, 187, 0.5);
+    color: black;
+}
+
+.li {
+    transition-duration: 0.2s;
+    border-radius: 0.7rem;
+    border: None;
+    display: inline-block;
+    color: black;
+    padding: 4;
+}
+
+
+.li:hover{
+    background-color: rgba(187, 187, 187, 0.5);
+    transition-duration: 0.2s;
+    border-radius: 0.7rem;
+    display: inline-block;
+    color: black;
+    padding: 4;
+}
+
+.li:focus {
+    box-shadow: 0 0 0 0.25rem rgba(187, 187, 187, 0.5);
+    border: None;
+    border-radius: 0.7rem;
+    display: inline-block;
+    padding: 4;
+}
+
+
+.content-section {
+    background: #ffffff;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    margin-top: 10vh;
+    margin-bottom: 10vh;
+    border: 1px solid rgba(187, 187, 187, 0.5);
+}
+
+@media (min-width: 200px) and (max-width: 600px)
+{
+    .content-section
+    {
+        margin-left: 10%;
+        margin-right: 10%;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 800px)
+{
+    .content-section
+    {
+        margin-left: 20%;
+        margin-right: 20%;
+    }
+}
+
+@media (min-width: 801px) and (max-width: 1000px)
+{
+    .content-section
+    {
+        margin-left: 25%;
+        margin-right: 25%;
+    }
+}
+
+@media (min-width: 1001px) and (max-width: 1200px)
+{
+    .content-section
+    {
+        margin-left: 30%;
+        margin-right: 30%;
+    }
+}
+
+@media (min-width: 1201px)
+{
+    .content-section
+    {
+        margin-left: 35%;
+        margin-right: 35%;
+    }
+}
+
+.variant-section {
+    background: #ffffff;
+    padding: 10px 20px;
+    margin-left: 35%;
+    margin-right: 35%;
+    margin-top: 1%;
+    margin-bottom: 1%;
+    border: 1px solid rgba(187, 187, 187, 0.5);
+}
+
+.form-check-input{
+    margin-left: 2px;
+}
+
+.form-check-input:checked
+{
+    background-color: rgb(187, 187, 187);
+    border-color: black;
+    box-shadow: 0 0 0 0.25rem rgba(187, 187, 187, 0.5);
+}
+
+.form-check-input:focus
+{
+    border-color: black;
+    box-shadow: 0 0 0 0.25rem rgba(187, 187, 187, 0.5);
+}
+
+.product-img-thumbnail {
+    height: 550px;
+    border-radius: 0.7rem;
+  }
+
+.bt {
+    border: None;
+}
+
+.bt:hover
+{
+    box-shadow: 0 0 0 0.25rem rgba(187, 187, 187, 0.5);
+    background-color: rgba(187, 187, 187, 0.5);
+    border-radius: 0.7rem;
+}
+
+.line-height 
+{
+    line-height: 1.7;
+}
+
+.button 
+{
+    background-color: white;
+}
+
+.login_oueter {
+    width: 360px;
+    max-width: 100%;
+}
+.logo_outer{
+    text-align: center;
+}
+.logo_outer img{
+    width:120px;
+    margin-bottom: 40px;
+}
+
+.auth-btn
+{
+    padding: 8px 20px;
+    font-size: large;
+}
+
+.dropdown-menu-width {
+    max-height: 280px;
+    width: 450px;
+    overflow-y: auto;
+}   
+
+@media (min-width: 200px) and (max-width: 600px)
+{   
+    .dropdown-menu-width
+    {
+        width: 100%;
+    }
+}

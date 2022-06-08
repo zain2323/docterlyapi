@@ -39,7 +39,7 @@ def initialize_extensions(app):
     from flask_login import current_user
     class RestrictIndexView(AdminIndexView):
         def is_accessible(self):
-            return current_user.is_authenticated and current_user.role.role == 'admin'
+            return current_user.is_authenticated and current_user.role.role_name == 'admin'
         
         def inaccessible_callback(self, name, **kwargs):
             # redirect to login page if user doesn't have access
@@ -49,13 +49,13 @@ def initialize_extensions(app):
 
 def register_blueprints(app):
     from api.webadmin import web_admin
-    from api.auth import auth
+    from api.auth import auth 
     from api.doctor import doctor
-    from api.patient import patient
-    from api.user import users
+    from api.patient import patient 
+    from api.user import users 
 
     app.register_blueprint(web_admin, url_prefix="/adminpanel")
     app.register_blueprint(users, url_prefix="/users")
     app.register_blueprint(auth, url_prefix="/auth")
-    app.register_blueprint(doctor, url_prefix="/doctor")
-    app.register_blueprint(patient, url_prefix="/patient")
+    app.register_blueprint(doctor, url_prefix="/doctors", name="doctors")
+    app.register_blueprint(patient, url_prefix="/patient", name="patients")

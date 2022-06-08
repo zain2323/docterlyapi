@@ -12,13 +12,13 @@ def sign_up():
     if form.validate_on_submit():
         name = form.name.data.lower()
         email = form.email.data.lower()
-        password = form.password
+        password = form.password.data
         user_role = "user"
         if email == 'admin@admin.com':
             user_role = 'admin'
-        role = Role.query.filter_by(role=user_role).first()
+        role = Role.query.filter_by(role_name=user_role).first()
         if role is None:
-            role = Role(role=user_role)
+            role = Role(role_name=user_role)
             db.session.add(role)
             db.session.commit()
         user = User(name=name, email=email, password=password, role_id=role.id, confirmed=True, dob=datetime.utcnow(), gender="male")
@@ -37,7 +37,7 @@ def sign_in():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            if user.role.role == "admin" and not user.confirmed:
+            if user.role.role_name == "admin" and not user.confirmed:
                 user.confirmed = True
                 db.session.commit()
             if not user.confirmed:
@@ -45,7 +45,7 @@ def sign_in():
                 # send_confirmation_email(user)
             else:
                 flash("Login Successfull!", "success")
-            if form.email.data == "admin@admin.com" and current_user.role.role == "admin":
+            if form.email.data == "admin@admin.com" and current_user.role.role_name == "admin":
                 return redirect(url_for("admin.index"))
             # If the user tries to access some route that requires login then
             # this line of code stores the url of that route and redirects the user
@@ -54,7 +54,7 @@ def sign_in():
             return redirect(next or url_for('admin.index'))
         else:
             flash("Please check your email or password.", "danger")
-        return redirect(url_for('auth.sign_in'))
+        return redirect(url_for('web_admin.sign_in'))
     return render_template("auth/signin.html", title='Login', form=form)
 
 
@@ -62,4 +62,4 @@ def sign_in():
 def sign_out():
     logout_user()
     flash("Logged out successfully!", "success")
-    return redirect("/")
+    return redirect(url_for('web_admin.sign_in'))

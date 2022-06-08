@@ -59,7 +59,7 @@ class Day(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User.get_user(user_id)
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -77,6 +77,10 @@ class User(db.Model, UserMixin):
     doctor = db.relationship("Doctor", backref="user", lazy=True)
     patient = db.relationship("Patient", backref="user", lazy=True)
     
+    @staticmethod
+    def get_user(id):
+        return User.query.get(id)
+
     def set_password(self, plain_password):
         self.password = self.generate_hashed_password(plain_password)
     
