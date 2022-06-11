@@ -16,6 +16,7 @@ doctor_qualifications = db.Table("doctor_qualfications",
     db.Column('qualification_id', db.Integer, db.ForeignKey('qualification.id', ondelete="RESTRICT"), primary_key=True, nullable=False),
     db.Column('procurement_year', db.Date, nullable=False),
     db.Column('institute_name', db.String, nullable=False)
+
 )
 
 medical_history = db.Table("medical_history",
@@ -125,13 +126,13 @@ class Doctor(db.Model):
     "Specialization", secondary=doctor_specializations,
     primaryjoin=(doctor_specializations.c.doctor_id == id),
     secondaryjoin=(doctor_specializations.c.specialization_id == Specialization.id),
-    backref=db.backref("doctor", lazy='dynamic'), lazy='dynamic', cascade="all, delete")
+    backref=db.backref("doctor", lazy='dynamic'), lazy=True, cascade="all, delete")
     # Many to Many relationship between doctor and qualifications
     qualifications = db.relationship(
     "Qualification", secondary=doctor_qualifications,
     primaryjoin=(doctor_qualifications.c.doctor_id == id),
     secondaryjoin=(doctor_qualifications.c.qualification_id == Qualification.id),
-    backref=db.backref("doctor", lazy='dynamic'), lazy='dynamic', cascade="all, delete")
+    backref=db.backref("doctor", lazy='dynamic'), lazy=True, cascade="all, delete")
 
     def __repr__(self):
         return f"doctor:id {self.id}"
@@ -144,6 +145,32 @@ class Doctor(db.Model):
     
     def get_user(self):
         return self.user
+    
+    def add_specialization(self, specialization):
+        self.specializations.append(specialization)
+    
+    def add_qualification(self, qualification, procurement_year, institute_name):
+        statement = doctor_qualifications.insert().values(doctor_id=self.id, qualification_id=qualification.id,
+                procurement_year=procurement_year, institute_name=institute_name)
+        db.session.execute(statement)
+    
+    def get_doctor_qualifications_and_info(self):
+        query = db.select(doctor_qualifications.c.institute_name, doctor_qualifications.c.procurement_year)
+        result = db.session.execute(query).all()
+
+        qualifications_list = self.qualifications
+        procurement_year_list = []
+        institute_name_list = [] 
+        for info in result:
+            institute_name_list.append(info[0])
+            procurement_year_list.append(info[1])
+        
+        info_dict = {
+            "qualification_name": qualifications_list,
+            "procurement_year": procurement_year_list,
+            "institute_name": institute_name_list
+        }
+        return info_dict
 
 class Prescription(db.Model):
     __tablename__ = "prescription"

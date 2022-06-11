@@ -1,10 +1,37 @@
 from distutils.command.config import dump_file
 from api import ma, token_auth
-from api.models import Doctor, User
+from api.models import Doctor, User, Specialization, Qualification
 from marshmallow import validate, validates, ValidationError, fields
 from api.webadmin.schema import SpecializationSchema, QualificationSchema
 from api.user.schema import UserSchema
 
+class DoctorSpecializations(ma.Schema):
+    specialization_name = fields.List(fields.String(required=True, validate=[validate.Length(max=30)]))
+
+    @validates("specialization_name")
+    def validate_specialization_name(self, value):
+        for specialization in value:
+            print(specialization)
+            specialization_db = Specialization.query.filter_by(name=specialization).first()
+            if not specialization_db:
+                message = f"{specialization} is an invalid choice"
+                raise ValidationError(message)
+
+class DoctorQualifications(ma.Schema):
+    class Meta:
+        ordered = True
+    qualification_name = fields.List(fields.String(required=True, validate=[validate.Length(max=30)]))
+    procurement_year = fields.List(fields.Date(required=True))
+    institute_name = fields.List(fields.String(required=True))
+
+    @validates("qualification_name")
+    def validate_qualification_name(self, value):
+        for qualification in value:
+            qualification_db = Qualification.query.filter_by(name=qualification).first()
+            if not qualification_db:
+                message = f"{qualification} is an invalid choice"
+                raise ValidationError(message)
+    
 
 class CreateNewDoctorSchema(ma.SQLAlchemySchema):
     """Schema defining the attributes when registering as a doctor"""
@@ -43,7 +70,16 @@ class DoctorSchema(ma.SQLAlchemyAutoSchema):
     id = ma.auto_field(dump_only=True)
     user = fields.Nested(UserSchema())
     description = ma.auto_field(required=True, dump_only=True)
-    specializations = fields.Nested(SpecializationSchema())
-    qualifications = fields.Nested(QualificationSchema())
+    specializations = fields.Nested(SpecializationSchema(many=True))
+    qualifications = fields.Nested(QualificationSchema(many=True))
+
+class DoctorInfoSchema(ma.Schema):
+    class Meta:
+        ordered = True
+    id = ma.Integer()
+    user = fields.Nested(UserSchema())
+    description = ma.String()
+    Specialization = fields.Nested(SpecializationSchema(many=True))
+    qualifications = fields.Nested(DoctorQualifications())
 
 doctors_schema = DoctorSchema(many=True)
