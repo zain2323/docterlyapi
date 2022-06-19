@@ -1,9 +1,10 @@
-from api.models import Doctor, User, Specialization, Qualification, doctor_qualifications
+from api.models import Doctor, User, Specialization, Qualification, doctor_qualifications, Slot, Day    
 from api import db, basic_auth, token_auth
 from apifairy import response, other_responses, body, authenticate
 from api.doctor import doctor
 from api.doctor.schema import (CreateNewDoctorSchema, DoctorSchema, doctors_schema, 
-    DoctorQualifications, DoctorSpecializations, DoctorInfoSchema)
+    DoctorQualifications, DoctorSpecializations, DoctorInfoSchema, CreateNewSlot, ReturnSlot)
+from datetime import timedelta, date, datetime, time
 
 @doctor.route("/new", methods=["POST"])
 @body(CreateNewDoctorSchema)
@@ -26,10 +27,9 @@ def new(kwargs):
 def get_current_doctor_info():
     """Get the currently authenticated doctor's info"""
     current_user = token_auth.current_user()
-    doctor = Doctor.query.filter_by(user=current_user).first()
+    doctor = Doctor.query.filter_by(user=current_user).first_or_404()
     qualifications_info = doctor.get_doctor_qualifications_and_info()
     doctor_info = prepare_doctor_info(doctor, qualifications_info)
-    print(doctor_info)
     return doctor_info
 
 def prepare_doctor_info(doctor, qualifications_info):
@@ -98,8 +98,30 @@ def parse_qualification_body(qualification_body):
     institute_name = qualification_body["institute_name"]
     return qualifications, procurement_year, institute_name
 
-def create_slot():
+@doctor.route("/add_slot", methods=["POST"])
+@authenticate(token_auth)
+@body(CreateNewSlot)
+@response(ReturnSlot, 200)
+def create_slot(kwargs):
     """Create your available slots"""
+    current_user = token_auth.current_user()
+    doctor = current_user.doctor
+    if doctor is None:
+        abort(401)
+    # Fetching day from the db
+    end = calculate_end_time(kwargs["start"], kwargs["appointment_duration"], kwargs["num_slots"])
+    slot = Slot(**kwargs)
+    slot.end = end
+    slot.doctor_id = doctor[0].id
+    db.session.add(slot)
+    db.session.commit()
+    return slot
+
+def calculate_end_time(start, duration, slots):
+    diff = duration * slots
+    # Additional 20 minutes are added to avoid clash
+    end = datetime.combine(date.today(), start) + timedelta(minutes=diff+20)
+    return end.time()
 
 def get_all_patients():
     """Returns all of your patients"""

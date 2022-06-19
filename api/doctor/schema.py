@@ -1,7 +1,7 @@
 from distutils.command.config import dump_file
 from api import ma, token_auth
-from api.models import Doctor, User, Specialization, Qualification
-from marshmallow import validate, validates, ValidationError, fields
+from api.models import Doctor, User, Specialization, Qualification, Slot, Role, Day
+from marshmallow import validate, validates, ValidationError, fields, post_load
 from api.webadmin.schema import SpecializationSchema, QualificationSchema
 from api.user.schema import UserSchema
 
@@ -43,7 +43,7 @@ class CreateNewDoctorSchema(ma.SQLAlchemySchema):
     dob = ma.Date(required=True)
     registered_at = ma.DateTime(dump_only=True)
     gender = ma.String(required=True, validate=[validate.Length(max=8)])
-    role_id = ma.Integer(required=True)
+    role = ma.String(required=True)
     description = ma.String(required=True)
 
     @validates("email")
@@ -61,6 +61,19 @@ class CreateNewDoctorSchema(ma.SQLAlchemySchema):
     def validate_name(self, value):
         if not value[0].isalpha():
             raise ValidationError("Email must start with a letter")
+    
+    @validates("role")
+    def validate_role(self, value):
+        role = Role.query.filter_by(role_name=value.lower()).first()
+        if role is None:
+            raise ValidationError("Invalid choice")
+    
+    @post_load
+    def transform_role(self, data, **kwargs):
+        role_str = data["role"]
+        role = Role.query.filter_by(role_name=role_str).first()
+        data["role"] = role
+        return data
 
 class DoctorSchema(ma.SQLAlchemyAutoSchema):
     """Schema defining the attributes of the doctor"""
@@ -81,5 +94,36 @@ class DoctorInfoSchema(ma.Schema):
     description = ma.String()
     Specialization = fields.Nested(SpecializationSchema(many=True))
     qualifications = fields.Nested(DoctorQualifications())
+
+class CreateNewSlot(ma.Schema):
+    class Meta:
+        ordered = True
+    day = ma.String(required=True)
+    start = ma.Time(required=True)
+    end = ma.Time(format="%H:%M", dump_only=True)
+    consultation_fee = ma.Integer(required=True, validate=[validate.Range(min=1)])
+    appointment_duration = ma.Integer(required=True, validate=[validate.Range(min=10, max=30)])
+    num_slots = ma.Integer(required=True, validate=[validate.Range(min=10, max=50)])
+
+    @validates("day")
+    def validate_day(self, value):
+        day = Day.query.filter_by(name=value.title()).first()
+        if day is None:
+            raise ValidationError("Invalid choice")
+    
+    @post_load   
+    def transform_day(self, data, **kwargs):
+        data["day"] = Day.query.filter_by(name=data["day"].title()).first()
+        return data
+    
+class ReturnSlot(ma.Schema):
+    class Meta:
+        ordered = True
+    day = ma.String()
+    start = ma.Time(format="%H:%M")
+    end = ma.Time(format="%H:%M")
+    consultation_fee = ma.Integer()
+    appointment_duration = ma.Integer()
+    num_slots = ma.Integer()
 
 doctors_schema = DoctorSchema(many=True)

@@ -1,24 +1,21 @@
 from api import ma, token_auth
 from marshmallow import validate, validates, validates_schema, ValidationError, post_load, fields
-from api.models import User
+from api.models import User, Role
 from api.webadmin.schema import RoleSchema
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     """Schema defining the attributes of User"""
     class Meta:
-        model = User
-        exclude = ("token", "token_expiration")
         ordered = True
-    id = ma.auto_field(dump_only=True)
-    name = ma.auto_field(required=True, validate=[validate.Length(min=3, max=64)])
-    email = ma.auto_field(required=True, validate=[validate.Length(max=120), validate.Email()])
-    password = ma.auto_field(reqired=True, validate=validate.Length(min=8), load_only=True)
-    registered_at = ma.auto_field(dump_only=True)
-    confirmed = ma.auto_field(dump_only=True)
-    dob = ma.auto_field(required=True)
-    gender = ma.auto_field(required=True, validate=[validate.Length(max=8)])
-    role = fields.Nested(RoleSchema, dump_only=True)
-    role_id = ma.auto_field(required=True, load_only=True)
+    id = ma.Integer(dump_only=True)
+    name = ma.String(required=True, validate=[validate.Length(min=3, max=64)])
+    email = ma.Email(required=True, validate=[validate.Length(max=120), validate.Email()])
+    password = ma.String(reqired=True, validate=validate.Length(min=8), load_only=True)
+    registered_at = ma.DateTime(dump_only=True)
+    confirmed = ma.Boolean(dump_only=True)
+    dob = ma.Date(required=True)
+    gender = ma.String(required=True, validate=[validate.Length(max=8)])
+    role = ma.String(required=True)
 
     @validates("email")
     def validate_email(self, value):
@@ -35,4 +32,17 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     def validate_name(self, value):
         if not value[0].isalpha():
             raise ValidationError("Email must start with a letter")
+    
+    @validates("role")
+    def validate_role(self, value):
+        role = Role.query.filter_by(role_name=value.lower()).first()
+        if role is None:
+            raise ValidationError("Invalid choice")
+    
+    @post_load
+    def transform_role(self, data, **kwargs):
+        role_str = data["role"]
+        role = Role.query.filter_by(role_name=role_str).first()
+        data["role"] = role
+        return data
 

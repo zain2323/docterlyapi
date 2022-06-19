@@ -233,11 +233,10 @@ class Slot(db.Model):
     __tablename__ = "slot"
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     day_id = db.Column(db.Integer, db.ForeignKey('day.id'), nullable=False)
-    doctor_id = db.Column(db.Integer, db.ForeignKey("doctor.id"))
+    doctor_id = db.Column(db.Integer, db.ForeignKey("doctor.id"), nullable=False)
     start = db.Column(db.Time, nullable=False)
     end = db.Column(db.Time, nullable=False)
     consultation_fee = db.Column(db.Integer, nullable=False)
-    room_number = db.Column(db.Integer, nullable=False)
     appointment_duration = db.Column(db.Integer, nullable=False)
     num_slots = db.Column(db.Integer, nullable=False)
     appointment = db.relationship("Appointment", backref="slot", lazy=True)
