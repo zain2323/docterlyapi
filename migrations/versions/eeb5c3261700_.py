@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 92f9a0a0bcaf
+Revision ID: eeb5c3261700
 Revises: 
-Create Date: 2022-06-18 23:49:39.797575
+Create Date: 2022-06-25 01:34:48.424946
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '92f9a0a0bcaf'
+revision = 'eeb5c3261700'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -115,15 +115,39 @@ def upgrade():
     sa.ForeignKeyConstraint(['doctor_id'], ['doctor.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('event',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('occurring_date', sa.Date(), nullable=False),
+    sa.Column('slot_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['slot_id'], ['slot.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('occurring_date', 'slot_id', name='unique_slot_event')
+    )
     op.create_table('appointment',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('slot_id', sa.Integer(), nullable=False),
     sa.Column('patient_id', sa.Integer(), nullable=False),
-    sa.Column('date', sa.Date(), nullable=False),
+    sa.Column('event_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['event_id'], ['event.id'], ),
     sa.ForeignKeyConstraint(['patient_id'], ['patient.id'], ),
     sa.ForeignKeyConstraint(['slot_id'], ['slot.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('slot_id', 'patient_id', name='unique_appointment')
+    sa.UniqueConstraint('event_id', 'patient_id', name='unique_appointment')
+    )
+    op.create_table('booked_slots',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('event_id', sa.Integer(), nullable=False),
+    sa.Column('slots_booked', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['event_id'], ['event.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('event_meta',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('event_id', sa.Integer(), nullable=False),
+    sa.Column('start_date', sa.Date(), nullable=False),
+    sa.Column('repeat_interval', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['event_id'], ['event.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('prescription',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -157,7 +181,10 @@ def downgrade():
     op.drop_table('prescribed_medicines')
     op.drop_table('medical_history')
     op.drop_table('prescription')
+    op.drop_table('event_meta')
+    op.drop_table('booked_slots')
     op.drop_table('appointment')
+    op.drop_table('event')
     op.drop_table('slot')
     op.drop_table('rating')
     op.drop_table('doctor_specializations')

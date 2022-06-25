@@ -52,10 +52,14 @@ def register_blueprints(app):
     from api.auth import auth 
     from api.doctor import doctor
     from api.patient import patient 
-    from api.user import users 
+    from api.user import users
+    from api.misc import misc
+    from api.commands import commands
 
     app.register_blueprint(web_admin, url_prefix="/adminpanel")
     app.register_blueprint(users, url_prefix="/users")
     app.register_blueprint(auth, url_prefix="/auth")
     app.register_blueprint(doctor, url_prefix="/doctors", name="doctors")
     app.register_blueprint(patient, url_prefix="/patient", name="patients")
+    app.register_blueprint(misc, url_prefix="/misc")
+    app.register_blueprint(commands)

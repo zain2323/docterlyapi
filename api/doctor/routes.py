@@ -1,10 +1,12 @@
-from api.models import Doctor, User, Specialization, Qualification, doctor_qualifications, Slot, Day    
+from api.models import (Doctor, User, Specialization, Qualification, doctor_qualifications, Slot, Day,
+                        Event, EventMeta, BookedSlots)    
 from api import db, basic_auth, token_auth
 from apifairy import response, other_responses, body, authenticate
 from api.doctor import doctor
 from api.doctor.schema import (CreateNewDoctorSchema, DoctorSchema, doctors_schema, 
-    DoctorQualifications, DoctorSpecializations, DoctorInfoSchema, CreateNewSlot, ReturnSlot)
+    DoctorQualifications, DoctorSpecializations, DoctorInfoSchema, CreateNewSlot, ReturnSlot, TimingsSchema)
 from datetime import timedelta, date, datetime, time
+from api.commands.jobs import next_weekday
 
 @doctor.route("/new", methods=["POST"])
 @body(CreateNewDoctorSchema)
@@ -42,18 +44,27 @@ def prepare_doctor_info(doctor, qualifications_info):
 
 @doctor.route("/all", methods=["GET"])
 @authenticate(token_auth)
-@response(doctors_schema)
+@response(DoctorInfoSchema(many=True))
 def get_all():
     """Returns all the registered doctors"""
-    return Doctor.query.all()
-    
+    doctors_info = []
+    doctors = Doctor.query.all()
+    for doctor in doctors:
+        qualifications_info = doctor.get_doctor_qualifications_and_info()
+        doctor_info = prepare_doctor_info(doctor, qualifications_info)
+        doctors_info.append(doctor_info)
+    return doctors_info
+
 @doctor.route("/get/<int:id>", methods=["GET"])
 @authenticate(token_auth)
-@response(DoctorSchema)
+@response(DoctorInfoSchema())
 @other_responses({404: "Doctor not found"})
 def get_doctor(id):
     """Get doctor by the id"""
-    return Doctor.query.get_or_404(id)
+    doctor = Doctor.query.get_or_404(id)
+    qualifications_info = doctor.get_doctor_qualifications_and_info()
+    doctor_info = prepare_doctor_info(doctor, qualifications_info)
+    return doctor_info
 
 @doctor.route("/add_specializations", methods=["POST"])
 @authenticate(token_auth)
@@ -114,6 +125,9 @@ def create_slot(kwargs):
     slot.end = end
     slot.doctor_id = doctor[0].id
     db.session.add(slot)
+    # Add event and meta details about the event
+    # Also adds the booked_slot table to keep track of the slots
+    create_event(slot)
     db.session.commit()
     return slot
 
@@ -122,6 +136,56 @@ def calculate_end_time(start, duration, slots):
     # Additional 20 minutes are added to avoid clash
     end = datetime.combine(date.today(), start) + timedelta(minutes=diff+20)
     return end.time()
+
+def create_event(slot):
+    weekday = slot.day.id
+    occurring_date = next_weekday(datetime.now().date(), weekday)
+    event = Event(occurring_date=occurring_date, slot=slot)
+    db.session.add(event)
+    create_event_meta(event)
+    booked_slots = BookedSlots(event=event)
+    db.session.add(booked_slots)
+
+def create_event_meta(event):
+    # Interval is choosen as 7
+    REPEAT_INTERVAL = 7 
+    start_date = event.occurring_date
+    event_meta = EventMeta(start_date=start_date, repeat_interval=REPEAT_INTERVAL, event=event)
+    db.session.add(event_meta)
+
+@doctor.route("/timings/<int:doctor_id>")
+@authenticate(token_auth)
+@response(TimingsSchema(many=True))
+def get_doctors_next_sitting_date(doctor_id):
+    """Return all the doctor's next sitting date with the given id"""
+    doctor = Doctor.query.get_or_404(doctor_id)
+    slots = doctor.slots
+    response = []
+    for slot in slots:
+        event = slot.get_latest_event()
+        occurring_date = event.occurring_date
+        response.append({"slot": slot, "occurring_date": occurring_date})
+    print(response)
+    return response
+
+@doctor.route("/slot/<int:doctor_id>")
+@authenticate(token_auth)
+@response(ReturnSlot(many=True))
+def get_available_slots(doctor_id):
+    """Return all the available slots of the doctor with the given id"""
+    doctor = Doctor.query.get_or_404(doctor_id)
+    return doctor.slots
+
+# @doctor.route("/slot/date/<int:doctor_id>")
+# @authenticate(token_auth)
+# @response()
+# def get_doctor_slots_date(doctor_id):
+#     doctor = Doctor.query.get_or_404(doctor_id)
+#     slots = doctor.slots
+#     for slot in slots:
+#         # Generate the slot date
+#         slot_id = slot.id
+#         (current_date - start_date) + interval
 
 def get_all_patients():
     """Returns all of your patients"""

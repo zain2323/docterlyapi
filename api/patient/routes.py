@@ -1,5 +1,5 @@
-from api.patient.schema import PatientSchema, patients_schema
-from api.models import Patient, User
+from api.patient.schema import PatientSchema, patients_schema, AppointmentSchema, ReturnAppointmentSchema
+from api.models import Patient, User, BookedSlots, Event, Slot, Appointment
 from api import token_auth, db 
 from apifairy import response, body, authenticate, other_responses
 from api.patient import patient
@@ -41,3 +41,14 @@ def get_all():
 def get_patient(id):
     """Get patient by the id"""
     return Patient.query.get_or_404(id)
+
+@patient.route("/new_appointment/<int:patient_id>", methods=["POST"])
+@authenticate(token_auth)
+@body(AppointmentSchema)
+@response(ReturnAppointmentSchema)
+def create_appointment(patient_id, kwargs):
+    """Create a new appointment for the given patient id"""
+    user = token_auth.current_user()
+    patient = Patient.query.get_or_404(patient_id)
+    
+    

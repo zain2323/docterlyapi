@@ -14,6 +14,7 @@ def make_shell_context():
             "Qualification": Qualification, "Day": Day, "Appointment": Appointment, "Slot": Slot,
             "Rating": Rating, "Prescription": Prescription, "Role": Role, "PrescribedMedicines": PrescribedMedicines,
             "doctor_specializations": doctor_specializations, "doctor_qualifications": doctor_qualifications,
+            "BookedSlots": BookedSlots, "Event": Event, "EventMeta": EventMeta,
             "UserSchema": UserSchema, "DoctorSchema": DoctorSchema, "CreateNewDoctorSchema": CreateNewDoctorSchema,
             "RoleSchema": RoleSchema, "TokenSchema": TokenSchema, "QualificationSchema": QualificationSchema,
             "SpecializationSchema": SpecializationSchema

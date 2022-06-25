@@ -68,7 +68,7 @@ class AppointmentView(RestrictedAccess):
     can_delete = False
     can_create = False
 
-    column_searchable_list = ["date"]
+    # column_searchable_list = ["date"]
 
 class SlotView(RestrictedAccess):
     can_edit = True

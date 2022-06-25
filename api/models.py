@@ -16,7 +16,6 @@ doctor_qualifications = db.Table("doctor_qualfications",
     db.Column('qualification_id', db.Integer, db.ForeignKey('qualification.id', ondelete="RESTRICT"), primary_key=True, nullable=False),
     db.Column('procurement_year', db.Date, nullable=False),
     db.Column('institute_name', db.String, nullable=False)
-
 )
 
 medical_history = db.Table("medical_history",
@@ -218,12 +217,12 @@ class Rating(db.Model):
 class Appointment(db.Model):
     __tablename__ = "appointment"
     __table_args__ = (
-        db.UniqueConstraint('slot_id', 'patient_id', name="unique_appointment"),
+        db.UniqueConstraint('event_id', 'patient_id', name="unique_appointment"),
     )
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     slot_id = db.Column(db.Integer, db.ForeignKey('slot.id'), nullable=False)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
     prescription = db.relationship("Prescription", backref="appointment", lazy=True)
 
     def __repr__(self):
@@ -240,9 +239,57 @@ class Slot(db.Model):
     appointment_duration = db.Column(db.Integer, nullable=False)
     num_slots = db.Column(db.Integer, nullable=False)
     appointment = db.relationship("Appointment", backref="slot", lazy=True)
-    
+    event = db.relationship("Event", backref="slot", lazy=True)
+
+    def get_latest_event(self):
+        return self.event[-1]
+
     def __repr__(self):
         return f"Start: {self.start}, End: {self.end}"
+
+class BookedSlots(db.Model):
+    __tablename__ = "booked_slots"
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    event_id = db.Column(db.ForeignKey("event.id"), nullable=False)
+    slots_booked = db.Column(db.Integer, default=0)
+
+    def increment_slot(self):
+        self.slots_booked += 1
+
+    def __repr__(self):
+        return f"Slots Booked: {self.slots_booked}"
+
+class Event(db.Model):
+    __tablename__ = "event"
+    __table_args__ = (
+        db.UniqueConstraint('occurring_date', 'slot_id', name="unique_slot_event"),
+    )
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    occurring_date = db.Column(db.Date, nullable=False)
+    slot_id = db.Column(db.ForeignKey("slot.id"), nullable=False)
+    event_meta = db.relationship("EventMeta", backref="event", lazy=True)
+    booked_slots = db.relationship("BookedSlots", backref="event", lazy=True)
+
+    def get_latest_event_info(self):
+        return self.booked_slots[-1]
+
+    def get_event_meta(self):
+        return self.event_meta[0]
+
+    def __repr__(self):
+        return f"Occurring date: {self.occurring_date}\n Slot Id: {self.slot_id}"
+
+class EventMeta(db.Model):
+    __tablename__ = "event_meta"
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
+    start_date = db.Column(db.Date, nullable=False)    
+    repeat_interval = db.Column(db.Integer, nullable=False)
+    
+    def __repr__(self):
+        return f"Event Id: {self.event_id}\n Start Date: {self.start_date}\n Repeat Interval: {self.repeat_interval}"
+
+# WHERE ( DATEDIFF( '2022-6-7', start_date ) % repeat_interval = 0)
 
 class PrescribedMedicines(db.Model):
     __tablename = "prescribed_medicine"

@@ -70,9 +70,7 @@ class CreateNewDoctorSchema(ma.SQLAlchemySchema):
     
     @post_load
     def transform_role(self, data, **kwargs):
-        role_str = data["role"]
-        role = Role.query.filter_by(role_name=role_str).first()
-        data["role"] = role
+        data["role"] = Role.query.filter_by(role_name=data["role"]).first()
         return data
 
 class DoctorSchema(ma.SQLAlchemyAutoSchema):
@@ -85,15 +83,6 @@ class DoctorSchema(ma.SQLAlchemyAutoSchema):
     description = ma.auto_field(required=True, dump_only=True)
     specializations = fields.Nested(SpecializationSchema(many=True))
     qualifications = fields.Nested(QualificationSchema(many=True))
-
-class DoctorInfoSchema(ma.Schema):
-    class Meta:
-        ordered = True
-    id = ma.Integer()
-    user = fields.Nested(UserSchema())
-    description = ma.String()
-    Specialization = fields.Nested(SpecializationSchema(many=True))
-    qualifications = fields.Nested(DoctorQualifications())
 
 class CreateNewSlot(ma.Schema):
     class Meta:
@@ -115,7 +104,8 @@ class CreateNewSlot(ma.Schema):
     def transform_day(self, data, **kwargs):
         data["day"] = Day.query.filter_by(name=data["day"].title()).first()
         return data
-    
+
+# Not using it as of now because implementing this schema will require heavy changes in the UI   
 class ReturnSlot(ma.Schema):
     class Meta:
         ordered = True
@@ -126,4 +116,32 @@ class ReturnSlot(ma.Schema):
     appointment_duration = ma.Integer()
     num_slots = ma.Integer()
 
+# This will be used for temporary purpose to support the UI
+# Will be removed later in future versions
+class SlotSchema(ma.Schema):
+    class Meta:
+        ordered = True
+    day = ma.List(ma.String())
+    start = ma.Time(format="%H:%M")
+    end = ma.Time(format="%H:%M")
+    consultation_fee = ma.Integer()
+    appointment_duration = ma.Integer()
+    num_slots = ma.Integer()
+
 doctors_schema = DoctorSchema(many=True)
+
+class DoctorInfoSchema(ma.Schema):
+    class Meta:
+        ordered = True
+    id = ma.Integer()
+    user = fields.Nested(UserSchema())
+    description = ma.String()
+    specializations = fields.Nested(SpecializationSchema(many=True))
+    qualifications = fields.Nested(DoctorQualifications())
+    slot = fields.Nested(SlotSchema)
+
+class TimingsSchema(ma.Schema):
+    class Meta:
+        ordered = True
+    slot = fields.Nested(ReturnSlot())
+    occurring_date = ma.Date()

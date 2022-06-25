@@ -41,8 +41,6 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     
     @post_load
     def transform_role(self, data, **kwargs):
-        role_str = data["role"]
-        role = Role.query.filter_by(role_name=role_str).first()
-        data["role"] = role
+        data["role"] = Role.query.filter_by(role_name=data['role']).first()
         return data
 
