@@ -269,6 +269,7 @@ class Event(db.Model):
     slot_id = db.Column(db.ForeignKey("slot.id"), nullable=False)
     event_meta = db.relationship("EventMeta", backref="event", lazy=True)
     booked_slots = db.relationship("BookedSlots", backref="event", lazy=True)
+    appointment = db.relationship("Appointment", backref="event", lazy=True)
 
     def get_latest_event_info(self):
         return self.booked_slots[-1]

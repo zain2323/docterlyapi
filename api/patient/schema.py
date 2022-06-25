@@ -1,8 +1,8 @@
 from api import ma, token_auth
 from marshmallow import validate, validates, ValidationError, fields
-from api.models import Patient, Doctor
+from api.models import Patient, Doctor, Event, Slot
 from api.user.schema import UserSchema
-from api.doctor.schema import ReturnSlot
+from api.doctor.schema import ReturnSlot, TimingsSchema
 
 class PatientSchema(ma.SQLAlchemyAutoSchema):
     """Schema defining the attributes of the patient"""
@@ -40,11 +40,14 @@ class AppointmentSchema(ma.Schema):
     id = ma.Integer(dump_only=True)
     slot_id = ma.Integer(required=True)
     patient_id = ma.Integer(required=True)
+    event_id = ma.Integer(required=True)
 
     @validates("patient_id")
     def validate_patient_id(self, value):
         current_user = token_auth.current_user()
-        patient = Patient.query.get_or_404(value)
+        patient = Patient.query.get(value)
+        if patient is None:
+            raise ValidationError("Invalid patient provided!")
         current_user_patients = current_user.patient
         if not patient in current_user_patients:
             raise ValidationError("Authorization Error. The patient your are trying to register either does not exist or does not belong to you.")
@@ -54,14 +57,22 @@ class AppointmentSchema(ma.Schema):
         slot = Slot.query.get(value)
         if slot is None:
             raise ValidationError("Invalid slot provided!")
+        slots_booked = slot.get_latest_event().get_latest_event_info().slots_booked
+        if slots_booked >= slot.num_slots:
+            raise ValidationError("All slots are full!")
 
+    @validates("event_id")
+    def validate_event_id(self, value):
+        event = Event.query.get(value)
+        if event is None:
+            raise ValidationError("Invalid event provided!")
+            
 class ReturnAppointmentSchema(ma.Schema):
     class Meta:
         ordered = True
     id = ma.Integer()
-    slot = fields.Nested(ReturnSlot)
-    patient = fields.Nested(PatientSchema)
-    date = ma.Date()
+    patient = fields.Nested(PatientSchema())
+    timings = fields.Nested(TimingsSchema())
 
 patients_schema = PatientSchema(many=True)
     

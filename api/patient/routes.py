@@ -3,6 +3,7 @@ from api.models import Patient, User, BookedSlots, Event, Slot, Appointment
 from api import token_auth, db 
 from apifairy import response, body, authenticate, other_responses
 from api.patient import patient
+from api.doctor.schema import TimingsSchema
 
 @patient.route("/new", methods=["POST"])
 @authenticate(token_auth)
@@ -42,13 +43,35 @@ def get_patient(id):
     """Get patient by the id"""
     return Patient.query.get_or_404(id)
 
-@patient.route("/new_appointment/<int:patient_id>", methods=["POST"])
+@patient.route("/new_appointment", methods=["POST"])
 @authenticate(token_auth)
 @body(AppointmentSchema)
 @response(ReturnAppointmentSchema)
-def create_appointment(patient_id, kwargs):
+def create_appointment(kwargs):
     """Create a new appointment for the given patient id"""
     user = token_auth.current_user()
-    patient = Patient.query.get_or_404(patient_id)
+    # Getting all the ids from the request body
+    patient_id = kwargs["patient_id"]
+    slot_id = kwargs["slot_id"]
+    event_id = kwargs["event_id"]
+    # Getting all the database entries from the given ids
+    patient = Patient.query.get(patient_id)
+    slot = Slot.query.get(slot_id)
+    event = Event.query.get(event_id)
+    # Creating appointment entry
+    appointment = Appointment(slot=slot, patient=patient, event=event)
+    db.session.add(appointment)
+    # Incrementing the booked slots by 1
+    booked_slot = event.get_latest_event_info()
+    booked_slot.increment_slot()
+   
+    # Creating the response object
+    occurring_date = event.occurring_date
+    timings = {"slot": slot, "occurring_date": occurring_date}
+    response = {"timings": timings, "patient": patient}
     
+    db.session.commit() 
+    return response
+
+
     

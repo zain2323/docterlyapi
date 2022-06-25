@@ -165,7 +165,6 @@ def get_doctors_next_sitting_date(doctor_id):
         event = slot.get_latest_event()
         occurring_date = event.occurring_date
         response.append({"slot": slot, "occurring_date": occurring_date})
-    print(response)
     return response
 
 @doctor.route("/slot/<int:doctor_id>")
@@ -175,17 +174,6 @@ def get_available_slots(doctor_id):
     """Return all the available slots of the doctor with the given id"""
     doctor = Doctor.query.get_or_404(doctor_id)
     return doctor.slots
-
-# @doctor.route("/slot/date/<int:doctor_id>")
-# @authenticate(token_auth)
-# @response()
-# def get_doctor_slots_date(doctor_id):
-#     doctor = Doctor.query.get_or_404(doctor_id)
-#     slots = doctor.slots
-#     for slot in slots:
-#         # Generate the slot date
-#         slot_id = slot.id
-#         (current_date - start_date) + interval
 
 def get_all_patients():
     """Returns all of your patients"""
