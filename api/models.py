@@ -186,7 +186,7 @@ class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(30), nullable=False)
-    dob = db.Column(db.Date, nullable=False)
+    age = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(8), nullable=False)
     rating = db.relationship("Rating", backref="patient", lazy=True)
     appointment = db.relationship("Appointment", backref="patient", lazy=True)
@@ -217,7 +217,7 @@ class Rating(db.Model):
 class Appointment(db.Model):
     __tablename__ = "appointment"
     __table_args__ = (
-        db.UniqueConstraint('event_id', 'patient_id', name="unique_appointment"),
+        db.UniqueConstraint('event_id', 'patient_id', 'slot_id', name="unique_appointment"),
     )
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     slot_id = db.Column(db.Integer, db.ForeignKey('slot.id'), nullable=False)
@@ -226,7 +226,7 @@ class Appointment(db.Model):
     prescription = db.relationship("Prescription", backref="appointment", lazy=True)
 
     def __repr__(self):
-        return f"slot_id: {self.slot_id}, patient_id:{self.patient_id}, date:{self.date}"
+        return f"slot_id: {self.slot_id}, patient_id:{self.patient_id}"
 
 class Slot(db.Model):
     __tablename__ = "slot"

@@ -2,7 +2,7 @@ from api import ma, token_auth
 from marshmallow import validate, validates, ValidationError, fields
 from api.models import Patient, Doctor, Event, Slot
 from api.user.schema import UserSchema
-from api.doctor.schema import ReturnSlot, TimingsSchema
+from api.doctor.schema import ReturnSlot, TimingsSchema, DoctorSchema
 
 class PatientSchema(ma.SQLAlchemyAutoSchema):
     """Schema defining the attributes of the patient"""
@@ -13,7 +13,7 @@ class PatientSchema(ma.SQLAlchemyAutoSchema):
     id = ma.auto_field(dump_only=True)
     user_id = ma.auto_field(required=True, dump_only=True)
     name = ma.auto_field(required=True, validate=[validate.Length(max=30)])
-    dob = ma.auto_field(required=True)
+    age = ma.auto_field(required=True)
     gender = ma.auto_field(required=True, validate=[validate.Length(max=8)])
     user = fields.Nested(UserSchema, dump_only=True)
 
@@ -33,6 +33,11 @@ class PatientSchema(ma.SQLAlchemyAutoSchema):
         doctor = Doctor.query.filter_by(user_id=current_user.id)
         if doctor:
             raise ValidationError("Doctor is not allowed to register as a patient")
+    
+    @validates("age")
+    def validate_age(self, value):
+        if value < 0:
+            raise ValidationError("Age must be positive.")
 
 class AppointmentSchema(ma.Schema):
     class Meta:
@@ -72,6 +77,15 @@ class ReturnAppointmentSchema(ma.Schema):
         ordered = True
     id = ma.Integer()
     patient = fields.Nested(PatientSchema())
+    timings = fields.Nested(TimingsSchema())
+    expected_time = ma.Time()
+
+class AppointmentHistorySchema(ma.Schema):
+    class Meta:
+        ordered = True
+    id = ma.Integer()
+    patient = fields.Nested(PatientSchema())
+    doctor = fields.Nested(DoctorSchema())
     timings = fields.Nested(TimingsSchema())
 
 patients_schema = PatientSchema(many=True)

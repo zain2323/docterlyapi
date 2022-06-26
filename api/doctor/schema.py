@@ -145,3 +145,4 @@ class TimingsSchema(ma.Schema):
         ordered = True
     slot = fields.Nested(ReturnSlot())
     occurring_date = ma.Date()
+    slots_booked = ma.Integer()

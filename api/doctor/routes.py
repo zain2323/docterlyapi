@@ -164,7 +164,9 @@ def get_doctors_next_sitting_date(doctor_id):
     for slot in slots:
         event = slot.get_latest_event()
         occurring_date = event.occurring_date
-        response.append({"slot": slot, "occurring_date": occurring_date})
+        # Getting number of slots booked til now 
+        slots_booked = event.get_latest_event_info().slots_booked
+        response.append({"slot": slot, "occurring_date": occurring_date, "slots_booked": slots_booked})
     return response
 
 @doctor.route("/slot/<int:doctor_id>")

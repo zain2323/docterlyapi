@@ -1,9 +1,11 @@
-from api.patient.schema import PatientSchema, patients_schema, AppointmentSchema, ReturnAppointmentSchema
+from api.patient.schema import (PatientSchema, patients_schema, AppointmentSchema,
+         ReturnAppointmentSchema, AppointmentHistorySchema)
 from api.models import Patient, User, BookedSlots, Event, Slot, Appointment
 from api import token_auth, db 
 from apifairy import response, body, authenticate, other_responses
 from api.patient import patient
 from api.doctor.schema import TimingsSchema
+from datetime import datetime, date , timedelta
 
 @patient.route("/new", methods=["POST"])
 @authenticate(token_auth)
@@ -63,15 +65,44 @@ def create_appointment(kwargs):
     db.session.add(appointment)
     # Incrementing the booked slots by 1
     booked_slot = event.get_latest_event_info()
+    # Calculating the expected time of the patient's appointment
+    diff = booked_slot.slots_booked * slot.appointment_duration
+    expected_time = get_patient_appointment_time(slot.start, diff)
     booked_slot.increment_slot()
    
     # Creating the response object
     occurring_date = event.occurring_date
-    timings = {"slot": slot, "occurring_date": occurring_date}
-    response = {"timings": timings, "patient": patient}
+    timings = {"slot": slot, "occurring_date": occurring_date, "slots_booked": booked_slot.slots_booked}
+    response = {"timings": timings, "patient": patient, "expected_time": expected_time}
     
     db.session.commit() 
     return response
 
+def get_patient_appointment_time(start, diff):
+    end = datetime.combine(date.today(), start) + timedelta(minutes=diff)
+    return end.time()
 
+@patient.route("/appointment/history", methods=["GET"])
+@authenticate(token_auth)
+@response(AppointmentHistorySchema(many=True))
+def appointment_history():
+    """Returns the appointment history for the currently authenticated user"""
+    current_user = token_auth.current_user()
+    # Getting all the patients registered under the authenticated user
+    patients = current_user.patient
+    response = []
+    for patient in patients:
+        # Getting all the appointments
+        appointments = patient.appointment
+        for appointment in appointments:
+            slot = appointment.slot
+            doctor = slot.doctor
+            event = slot.get_latest_event()
+            occurring_date = event.occurring_date
+            booked_slot = event.get_latest_event_info().slots_booked
+            # Timings dict
+            timings = {"slot": slot, "occurring_date": occurring_date, "slots_booked": booked_slot}
+            # COnstructing the final response object
+            response.append({"patient": patient, "doctor": doctor, "timings": timings})
+    return response
     

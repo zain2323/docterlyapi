@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: eeb5c3261700
+Revision ID: 93b4a62c44ff
 Revises: 
-Create Date: 2022-06-25 01:34:48.424946
+Create Date: 2022-06-26 11:05:19.471820
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'eeb5c3261700'
+revision = '93b4a62c44ff'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -70,7 +70,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=30), nullable=False),
-    sa.Column('dob', sa.Date(), nullable=False),
+    sa.Column('age', sa.Integer(), nullable=False),
     sa.Column('gender', sa.String(length=8), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -132,7 +132,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['patient_id'], ['patient.id'], ),
     sa.ForeignKeyConstraint(['slot_id'], ['slot.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('event_id', 'patient_id', name='unique_appointment')
+    sa.UniqueConstraint('event_id', 'patient_id', 'slot_id', name='unique_appointment')
     )
     op.create_table('booked_slots',
     sa.Column('id', sa.Integer(), nullable=False),
