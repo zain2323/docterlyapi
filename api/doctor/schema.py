@@ -81,7 +81,7 @@ class DoctorSchema(ma.SQLAlchemyAutoSchema):
     user = fields.Nested(UserSchema())
     description = ma.auto_field(required=True, dump_only=True)
     specializations = fields.Nested(SpecializationSchema(many=True))
-    qualifications = fields.Nested(QualificationSchema(many=True))
+    qualifications = fields.Nested(DoctorQualifications(many=True))
 
 class CreateNewSlot(ma.Schema):
     class Meta:

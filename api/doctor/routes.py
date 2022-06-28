@@ -37,14 +37,12 @@ def get_current_doctor_info():
     return doctor_info
 
 def prepare_doctor_info(doctor, qualifications_info):
-    doctor_schema = DoctorSchema()
-    qualifications_info_schema = DoctorQualifications()
-    doctor_dict = doctor_schema.dump(doctor)
-    qualifications_info_dict = qualifications_info_schema.dump(qualifications_info)
-    doctor_dict["qualifications"] = qualifications_info_dict
-    doctor_dict["slot"] = doctor.slots
-    print(doctor.slots)
-    return doctor_dict
+    user = doctor.user
+    description = doctor.description
+    qualifications = qualifications_info
+    specializations = doctor.specializations
+    slot = doctor.slots
+    return {"user": user, "description": description, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
 
 @doctor.route("/all", methods=["GET"])
 @authenticate(token_auth)
