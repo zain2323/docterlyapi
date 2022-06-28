@@ -1,5 +1,5 @@
 from api.models import (Doctor, User, Specialization, Qualification, doctor_qualifications, Slot, Day,
-                        Event, EventMeta, BookedSlots)    
+                        Event, EventMeta, BookedSlots, Appointment)    
 from api import db, basic_auth, token_auth
 from apifairy import response, other_responses, body, authenticate
 from api.doctor import doctor
@@ -7,6 +7,8 @@ from api.doctor.schema import (CreateNewDoctorSchema, DoctorSchema, doctors_sche
     DoctorQualifications, DoctorSpecializations, DoctorInfoSchema, CreateNewSlot, ReturnSlot, TimingsSchema)
 from datetime import timedelta, date, datetime, time
 from api.commands.jobs import next_weekday
+from api.patient.schema import PatientSchema
+from flask import abort
 
 @doctor.route("/new", methods=["POST"])
 @body(CreateNewDoctorSchema)
@@ -40,6 +42,8 @@ def prepare_doctor_info(doctor, qualifications_info):
     doctor_dict = doctor_schema.dump(doctor)
     qualifications_info_dict = qualifications_info_schema.dump(qualifications_info)
     doctor_dict["qualifications"] = qualifications_info_dict
+    doctor_dict["slot"] = doctor.slots
+    print(doctor.slots)
     return doctor_dict
 
 @doctor.route("/all", methods=["GET"])
@@ -73,12 +77,13 @@ def get_doctor(id):
 def add_specializations(specializations):
     """Add specializations"""
     current_user = token_auth.current_user()
-    doctor = current_user.doctor[0]
-    if doctor is None:
+    doctor = current_user.doctor
+    if doctor == []:
         abort(401)
+    doctor = doctor[0]
     for specialization in specializations.values():
         specialization = specialization[0]
-        specialization_db = Specialization.query.filter_by(name=specialization).first()
+        specialization_db = Specialization.query.filter_by(name=specialization.lower()).first()
         doctor.add_specialization(specialization_db)
     db.session.commit()
     return specializations
@@ -90,14 +95,15 @@ def add_specializations(specializations):
 def add_qualfications(qualifications):
     """Add qualifications"""
     current_user = token_auth.current_user()
-    doctor = current_user.doctor[0]
-    if doctor is None:
+    doctor = current_user.doctor
+    if doctor == []:
         abort(401)
+    doctor = doctor[0]
     qualification_name, procurement_year, institute_name = parse_qualification_body(qualifications)
     for i in range(len(qualification_name)):
-        name = qualification_name[i]
+        name = qualification_name[i].lower()
         year = procurement_year[i]
-        ins_name = institute_name[i]
+        ins_name = institute_name[i].lower()
         qualification_db = Qualification.query.filter_by(name=name).first()
         doctor.add_qualification(qualification_db, year, ins_name)
     db.session.commit()
@@ -177,13 +183,41 @@ def get_available_slots(doctor_id):
     doctor = Doctor.query.get_or_404(doctor_id)
     return doctor.slots
 
+@doctor.route("/patients", methods=["GET"])
+@authenticate(token_auth)
+@response(PatientSchema(many=True))
 def get_all_patients():
     """Returns all of your patients"""
-
+    current_user = token_auth.current_user()
+    doctor = current_user.doctor
+    if doctor == []:
+        abort(401)
+    slots = doctor[0].slots
+    patients = []
+    for slot in slots:
+        appointments = slot.appointment
+        for appointment in appointments:
+            patient = Patient.query.filter_by(appointment-appointment).first()
+            patients.append(patient)
+    return patients
+            
+@doctor.route("/patients/<int:appointment_id>")
+@authenticate(token_auth)
+@response(PatientSchema(many=True))
 def get_appointment_patients(appointment_id):
-    """Returns all the patients of the particular appointment id"""
-
-
-
-
-    
+    """Returns all the patients of the particular appointment id of the currently authenticated doctor"""
+    current_user = token_auth.current_user()
+    doctor = current_user.doctor
+    if doctor == []:
+        abort(401)
+    # Verifying the appointment id belongs to the current doctor
+    slots = doctor[0].slots
+    appointments = []
+    for slot in slots:
+        apppointments = slot.appointment
+    given_appointment = Appointment.query.get(appointment_id)
+    if  given_appointment not in appointments:
+        abort(401)
+    # Returning the list of patients
+    patients = appointment.patient
+    return patients

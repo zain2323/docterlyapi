@@ -4,6 +4,7 @@ from apifairy  import authenticate, body, other_responses, response
 from api.auth.schema import TokenSchema
 from api.models import User
 from api.auth import auth
+from flask import jsonify
 
 
 @auth.route("/get_token", methods=["POST"])
@@ -16,4 +17,13 @@ def get_auth_token():
     token = user.get_token()
     db.session.commit()
     return dict(token=token)
-    
+
+@auth.route("/logout", methods=["PUT"])
+@authenticate(token_auth)
+def logout():
+    """Logout the currently authenticated user"""
+    user = token_auth.current_user()
+    user.token = None
+    user.token_expiration = None
+    db.session.commit()
+    return jsonify({"message": "Token Revoked"})

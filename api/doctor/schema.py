@@ -11,8 +11,7 @@ class DoctorSpecializations(ma.Schema):
     @validates("specialization_name")
     def validate_specialization_name(self, value):
         for specialization in value:
-            print(specialization)
-            specialization_db = Specialization.query.filter_by(name=specialization).first()
+            specialization_db = Specialization.query.filter_by(name=specialization.lower()).first()
             if not specialization_db:
                 message = f"{specialization} is an invalid choice"
                 raise ValidationError(message)
@@ -27,7 +26,7 @@ class DoctorQualifications(ma.Schema):
     @validates("qualification_name")
     def validate_qualification_name(self, value):
         for qualification in value:
-            qualification_db = Qualification.query.filter_by(name=qualification).first()
+            qualification_db = Qualification.query.filter_by(name=qualification.lower()).first()
             if not qualification_db:
                 message = f"{qualification} is an invalid choice"
                 raise ValidationError(message)
@@ -96,13 +95,13 @@ class CreateNewSlot(ma.Schema):
 
     @validates("day")
     def validate_day(self, value):
-        day = Day.query.filter_by(name=value.title()).first()
+        day = Day.query.filter_by(name=value.lower()).first()
         if day is None:
             raise ValidationError("Invalid choice")
     
     @post_load   
     def transform_day(self, data, **kwargs):
-        data["day"] = Day.query.filter_by(name=data["day"].title()).first()
+        data["day"] = Day.query.filter_by(name=data["day"].lower()).first()
         return data
 
 # Not using it as of now because implementing this schema will require heavy changes in the UI   
@@ -138,7 +137,7 @@ class DoctorInfoSchema(ma.Schema):
     description = ma.String()
     specializations = fields.Nested(SpecializationSchema(many=True))
     qualifications = fields.Nested(DoctorQualifications())
-    slot = fields.Nested(SlotSchema)
+    slot = fields.Nested(ReturnSlot(many=True))
 
 class TimingsSchema(ma.Schema):
     class Meta:

@@ -34,8 +34,10 @@ def get_all_patients():
 @authenticate(token_auth)
 @response(patients_schema)
 def get_all():
-    """Returns all the registered patients"""
-    return Patient.query.all()
+    """Returns all the registered patients for the currently authenticated user"""
+    current_user = token_auth.current_user()
+    patients = current_user.patient
+    return patients
     
 @patient.route("/get/<int:id>", methods=["GET"])
 @authenticate(token_auth)
@@ -105,4 +107,3 @@ def appointment_history():
             # COnstructing the final response object
             response.append({"patient": patient, "doctor": doctor, "timings": timings})
     return response
-    

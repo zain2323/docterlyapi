@@ -22,6 +22,3 @@ def register(kwargs):
 def get_account_info():
     """Get the currently authenticated user's info"""
     return token_auth.current_user()
-
-
-
