@@ -7,14 +7,14 @@ class QualificationSchema(ma.SQLAlchemyAutoSchema):
         model = Qualification
         ordered = True
     id = ma.auto_field(dump_only=True)
-    name = ma.auto_field(required=True, validate=[validate.Length(max=30)])
+    name = ma.auto_field(required=True, validate=[validate.Length(max=50)])
 
 class SpecializationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Specialization
         ordered = True
     id = ma.auto_field(dump_only=True)
-    name = ma.auto_field(required=True, validate=[validate.Length(max=30)])
+    name = ma.auto_field(required=True, validate=[validate.Length(max=50)])
 
 class RoleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

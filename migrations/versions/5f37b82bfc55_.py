@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 93b4a62c44ff
+Revision ID: 5f37b82bfc55
 Revises: 
-Create Date: 2022-06-26 11:05:19.471820
+Create Date: 2022-06-29 09:56:39.856971
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '93b4a62c44ff'
+revision = '5f37b82bfc55'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,7 +26,7 @@ def upgrade():
     op.create_index(op.f('ix_day_name'), 'day', ['name'], unique=True)
     op.create_table('qualification',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=30), nullable=False),
+    sa.Column('name', sa.String(length=50), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_qualification_name'), 'qualification', ['name'], unique=True)
@@ -38,7 +38,7 @@ def upgrade():
     op.create_index(op.f('ix_role_role_name'), 'role', ['role_name'], unique=True)
     op.create_table('specialization',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=30), nullable=False),
+    sa.Column('name', sa.String(length=50), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_specialization_name'), 'specialization', ['name'], unique=True)
@@ -75,7 +75,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('doctor_qualfications',
+    op.create_table('doctor_qualifications',
     sa.Column('doctor_id', sa.Integer(), nullable=False),
     sa.Column('qualification_id', sa.Integer(), nullable=False),
     sa.Column('procurement_year', sa.Date(), nullable=False),
@@ -188,7 +188,7 @@ def downgrade():
     op.drop_table('slot')
     op.drop_table('rating')
     op.drop_table('doctor_specializations')
-    op.drop_table('doctor_qualfications')
+    op.drop_table('doctor_qualifications')
     op.drop_table('patient')
     op.drop_table('doctor')
     op.drop_index(op.f('ix_user_token'), table_name='user')

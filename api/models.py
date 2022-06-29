@@ -11,7 +11,7 @@ doctor_specializations = db.Table("doctor_specializations",
     db.Column('specialization_id', db.Integer, db.ForeignKey('specialization.id', ondelete="RESTRICT"), primary_key=True, nullable=False)
 )
 
-doctor_qualifications = db.Table("doctor_qualfications",
+doctor_qualifications = db.Table("doctor_qualifications",
     db.Column('doctor_id', db.Integer, db.ForeignKey('doctor.id', ondelete='CASCADE'), primary_key=True, nullable=False),
     db.Column('qualification_id', db.Integer, db.ForeignKey('qualification.id', ondelete="RESTRICT"), primary_key=True, nullable=False),
     db.Column('procurement_year', db.Date, nullable=False),
@@ -35,7 +35,7 @@ class Role(db.Model):
 class Specialization(db.Model):
     __tablename__ = "specialization"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), unique=True, nullable=False, index=True)
+    name = db.Column(db.String(50), unique=True, nullable=False, index=True)
 
     def __repr__(self):
         return f"{self.name}"
@@ -43,7 +43,7 @@ class Specialization(db.Model):
 class Qualification(db.Model):
     __tablename__= "qualification"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), unique=True, index=True, nullable=False)
+    name = db.Column(db.String(50), unique=True, index=True, nullable=False)
 
     def __repr__(self):
         return f"{self.name}"
@@ -66,7 +66,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    password = db.Column(db.String(60), nullable=False)
+    password = db.Column(db.String(102), nullable=False)
     registered_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     confirmed = db.Column(db.Boolean, default=False, nullable=False)
     dob = db.Column(db.Date, nullable=False)

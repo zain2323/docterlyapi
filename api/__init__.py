@@ -6,7 +6,7 @@ from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from flask_migrate import Migrate
 from flask_admin import Admin
 from flask_login import LoginManager
-from api.config import DevelopmentConfig as Config
+from api.config import ProductionConfig as Config
 from flask_admin.base import AdminIndexView
 
 api_fairy = APIFairy()
