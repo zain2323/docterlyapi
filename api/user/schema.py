@@ -43,4 +43,10 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     def transform_role(self, data, **kwargs):
         data["role"] = Role.query.filter_by(role_name=data['role']).first()
         return data
+    
+    @validates("gender")
+    def validate_gender(self, value):
+        value = value.lower()
+        if value not in ["male", "female"]:
+            raise ValidationError("Invalid gender")
 

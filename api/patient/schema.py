@@ -2,7 +2,7 @@ from api import ma, token_auth
 from marshmallow import validate, validates, ValidationError, fields
 from api.models import Patient, Doctor, Event, Slot
 from api.user.schema import UserSchema
-from api.doctor.schema import ReturnSlot, TimingsSchema, DoctorSchema
+from api.doctor.schema import ReturnSlot, TimingsSchema, DoctorInfoSchema
 
 class PatientSchema(ma.SQLAlchemyAutoSchema):
     """Schema defining the attributes of the patient"""
@@ -21,6 +21,12 @@ class PatientSchema(ma.SQLAlchemyAutoSchema):
     def validate_name(self, value):
         if not value[0].isalpha():
             raise ValidationError("Email must start with a letter")
+    
+    @validates("gender")
+    def validate_gender(self, value):
+        value = value.lower()
+        if value not in ["male", "female"]:
+            raise ValidationError("Invalid gender")
     
     @validates("user_id")
     def validate_user(self, value):
@@ -85,7 +91,7 @@ class AppointmentHistorySchema(ma.Schema):
         ordered = True
     id = ma.Integer()
     patient = fields.Nested(PatientSchema())
-    doctor = fields.Nested(DoctorSchema())
+    doctor = fields.Nested(DoctorInfoSchema())
     timings = fields.Nested(TimingsSchema())
 
 patients_schema = PatientSchema(many=True)

@@ -99,6 +99,7 @@ def appointment_history():
         for appointment in appointments:
             slot = appointment.slot
             doctor = slot.doctor
+            doctor = prepare_doctor_info(doctor)
             event = slot.get_latest_event()
             occurring_date = event.occurring_date
             booked_slot = event.get_latest_event_info().slots_booked
@@ -107,3 +108,12 @@ def appointment_history():
             # COnstructing the final response object
             response.append({"patient": patient, "doctor": doctor, "timings": timings})
     return response
+
+def prepare_doctor_info(doctor):
+    user = doctor.user
+    id = doctor.id
+    description = doctor.description
+    qualifications = doctor.get_doctor_qualifications_and_info()    
+    specializations = doctor.specializations[0]
+    return {"id": id, "description": description, "specializations": specializations, 'qualifications': qualifications,  "user": user}
+

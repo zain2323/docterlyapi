@@ -135,7 +135,7 @@ class DoctorInfoSchema(ma.Schema):
     id = ma.Integer()
     user = fields.Nested(UserSchema())
     description = ma.String()
-    specializations = fields.Nested(SpecializationSchema(many=True))
+    specializations = fields.Nested(SpecializationSchema())
     qualifications = fields.Nested(DoctorQualifications())
     slot = fields.Nested(ReturnSlot(many=True))
 

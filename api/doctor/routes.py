@@ -38,11 +38,12 @@ def get_current_doctor_info():
 
 def prepare_doctor_info(doctor, qualifications_info):
     user = doctor.user
+    id = doctor.id
     description = doctor.description
     qualifications = qualifications_info
-    specializations = doctor.specializations
+    specializations = doctor.specializations[0]
     slot = doctor.slots
-    return {"user": user, "description": description, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
+    return {"id": id, "user": user, "description": description, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
 
 @doctor.route("/all", methods=["GET"])
 @authenticate(token_auth)
