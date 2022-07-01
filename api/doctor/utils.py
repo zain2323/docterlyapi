@@ -1,3 +1,5 @@
+from datetime import datetime
+
 def get_experience(qualifications):
     # Returns the experience of the doctor by subracting the earliest date of degree procurement from the current date
     date_format = "%Y-%m-%d"
