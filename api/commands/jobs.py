@@ -1,7 +1,9 @@
 from api.commands import commands
 from api.models import Slot, BookedSlots, Event, EventMeta, User, Role, Day, Specialization, Qualification
 from datetime import datetime, timedelta
-from api import db
+from api import db, api_fairy
+from json import dumps
+from flask import current_app
 
 @commands.cli.command()
 def create_scheduled_events():
@@ -14,7 +16,7 @@ def create_scheduled_events():
         end = slot.end
         # Getting next date of the appointment
         current_date = datetime.now().date()
-        current_time = datetime().now().time()
+        current_time = datetime.now().time()
         next_date = next_weekday(current_date, day.id)
         # Fetching current date of the appointment
         event = slot.get_latest_event()
@@ -28,10 +30,13 @@ def create_scheduled_events():
             interval = event_meta.repeat_interval
             start_date = event_meta.start_date
             # Generating the new date
-            new_date = (current_date - start_date) + interval
+            new_date = (current_date - start_date) + timedelta(days=interval)
             # Creating the new event
-            new_event = Event(occurring_date=new_date, slot=slot)
-            db.session.add(new_event)
+            try:
+                new_event = Event(occurring_date=next_date, slot=slot)
+                db.session.add(new_event)
+            except:
+                db.session.rollback()
             # Creating the new booked slot
             new_booked_slot = BookedSlots(event=new_event)
             db.session.add(new_booked_slot)
@@ -42,6 +47,13 @@ def next_weekday(date, weekday):
     if days_ahead <= 0:
         days_ahead += 7
     return date + timedelta(days_ahead)   
+
+@commands.cli.command()
+def create_openapispec_file():
+    with current_app.test_request_context():
+        with open("openapispec.json", "w") as file:
+            data = dumps(api_fairy.apispec)
+            file.write(data)
 
 @commands.cli.command()
 def insert_prerequiste_data():

@@ -4,7 +4,6 @@ from api.doctor.schema import *
 from api.user.schema import *
 from api.auth.schema import *
 from flask import redirect, url_for
-from json import dumps
 
 app = create_app()
 
@@ -23,7 +22,6 @@ def make_shell_context():
 
 @app.route('/')
 def index():
-    print(dumps(api_fairy.apispec)) 
     return redirect(url_for('apifairy.docs'))
 
 if __name__ == 'main':
