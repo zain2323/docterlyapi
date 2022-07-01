@@ -6,7 +6,7 @@ from apifairy import response, body, authenticate, other_responses
 from api.patient import patient
 from api.doctor.schema import TimingsSchema
 from datetime import datetime, date , timedelta
-from api.doctor.routes import get_experience
+from api.doctor.utils import get_experience
 
 @patient.route("/new", methods=["POST"])
 @authenticate(token_auth)
