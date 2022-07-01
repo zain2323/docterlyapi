@@ -108,6 +108,7 @@ class CreateNewSlot(ma.Schema):
 class ReturnSlot(ma.Schema):
     class Meta:
         ordered = True
+    id = ma.Integer()
     day = ma.String()
     start = ma.Time(format="%H:%M")
     end = ma.Time(format="%H:%M")
@@ -135,6 +136,7 @@ class DoctorInfoSchema(ma.Schema):
     id = ma.Integer()
     user = fields.Nested(UserSchema())
     description = ma.String()
+    experience = ma.Integer()
     specializations = fields.Nested(SpecializationSchema())
     qualifications = fields.Nested(DoctorQualifications())
     slot = fields.Nested(ReturnSlot(many=True))

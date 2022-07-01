@@ -51,7 +51,6 @@ class AppointmentSchema(ma.Schema):
     id = ma.Integer(dump_only=True)
     slot_id = ma.Integer(required=True)
     patient_id = ma.Integer(required=True)
-    event_id = ma.Integer(required=True)
 
     @validates("patient_id")
     def validate_patient_id(self, value):
@@ -71,12 +70,6 @@ class AppointmentSchema(ma.Schema):
         slots_booked = slot.get_latest_event().get_latest_event_info().slots_booked
         if slots_booked >= slot.num_slots:
             raise ValidationError("All slots are full!")
-
-    @validates("event_id")
-    def validate_event_id(self, value):
-        event = Event.query.get(value)
-        if event is None:
-            raise ValidationError("Invalid event provided!")
             
 class ReturnAppointmentSchema(ma.Schema):
     class Meta:

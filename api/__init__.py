@@ -25,7 +25,6 @@ def create_app(config=Config):
     app.config.from_object(Config)
     initialize_extensions(app)
     register_blueprints(app)
-
     from api import models
     return app
 

@@ -42,8 +42,20 @@ def prepare_doctor_info(doctor, qualifications_info):
     description = doctor.description
     qualifications = qualifications_info
     specializations = doctor.specializations[0]
+    experience = get_experience(qualifications)
     slot = doctor.slots
-    return {"id": id, "user": user, "description": description, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
+    return {"id": id, "user": user, "description": description, "experience": experience, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
+
+def get_experience(qualifications):
+    # Returns the experience of the doctor by subracting the earliest date of degree procurement from the current date
+    date_format = "%Y-%m-%d"
+    min_date = str(min(qualifications["procurement_year"]))
+    current_date = str(datetime.now().date())
+
+    min_date = datetime.strptime(min_date, date_format)
+    current_date = datetime.strptime(current_date, date_format)
+
+    return int((abs(current_date - min_date).days)/365)
 
 @doctor.route("/all", methods=["GET"])
 @authenticate(token_auth)

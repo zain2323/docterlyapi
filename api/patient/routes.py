@@ -6,6 +6,7 @@ from apifairy import response, body, authenticate, other_responses
 from api.patient import patient
 from api.doctor.schema import TimingsSchema
 from datetime import datetime, date , timedelta
+from api.doctor.routes import get_experience
 
 @patient.route("/new", methods=["POST"])
 @authenticate(token_auth)
@@ -57,11 +58,10 @@ def create_appointment(kwargs):
     # Getting all the ids from the request body
     patient_id = kwargs["patient_id"]
     slot_id = kwargs["slot_id"]
-    event_id = kwargs["event_id"]
     # Getting all the database entries from the given ids
     patient = Patient.query.get(patient_id)
     slot = Slot.query.get(slot_id)
-    event = Event.query.get(event_id)
+    event = slot.get_latest_event()
     # Creating appointment entry
     appointment = Appointment(slot=slot, patient=patient, event=event)
     db.session.add(appointment)
@@ -113,7 +113,8 @@ def prepare_doctor_info(doctor):
     user = doctor.user
     id = doctor.id
     description = doctor.description
-    qualifications = doctor.get_doctor_qualifications_and_info()    
+    qualifications = doctor.get_doctor_qualifications_and_info()
+    experience = get_experience(qualifications)    
     specializations = doctor.specializations[0]
-    return {"id": id, "description": description, "specializations": specializations, 'qualifications': qualifications,  "user": user}
+    return {"id": id, "description": description, "experience":experience, "specializations": specializations, 'qualifications': qualifications,  "user": user}
 
