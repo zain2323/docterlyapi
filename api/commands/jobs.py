@@ -32,11 +32,8 @@ def create_scheduled_events():
             # Generating the new date
             new_date = (current_date - start_date) + timedelta(days=interval)
             # Creating the new event
-            try:
-                new_event = Event(occurring_date=next_date, slot=slot)
-                db.session.add(new_event)
-            except:
-                db.session.rollback()
+            new_event = Event(occurring_date=next_date, slot=slot)
+            db.session.add(new_event)
             # Creating the new booked slot
             new_booked_slot = BookedSlots(event=new_event)
             db.session.add(new_booked_slot)

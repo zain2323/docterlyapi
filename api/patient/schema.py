@@ -1,6 +1,6 @@
 from api import ma, token_auth
-from marshmallow import validate, validates, ValidationError, fields
-from api.models import Patient, Doctor, Event, Slot
+from marshmallow import validate, validates, ValidationError, fields,validates_schema
+from api.models import Patient, Doctor, Event, Slot, Appointment
 from api.user.schema import UserSchema
 from api.doctor.schema import ReturnSlot, TimingsSchema, DoctorInfoSchema
 
@@ -70,7 +70,24 @@ class AppointmentSchema(ma.Schema):
         slots_booked = slot.get_latest_event().get_latest_event_info().slots_booked
         if slots_booked >= slot.num_slots:
             raise ValidationError("All slots are full!")
-            
+    
+    @validates_schema
+    def validate_unique_patient_per_event(self, data, **kwargs):
+        patient_id = data["patient_id"]
+        slot_id = data["slot_id"]
+        # Getting patient and slot objects from their respective ids
+        patient = Patient.query.get(patient_id)
+        slot = Slot.query.get(slot_id)
+        # Verifying if the slot and patient exists
+        if slot is None or patient is None:
+            raise ValidationError("Either patient or slot does not exist.")
+        # Getting the event object from the slot
+        event = slot.get_latest_event()
+        # Checking if there exists an appoinment
+        appointment = Appointment.query.filter_by(event=event, slot=slot, patient=patient).first()
+        if appointment is not None:
+            raise ValidationError("You have already registered a slot for the patient named " + patient.name)
+
 class ReturnAppointmentSchema(ma.Schema):
     class Meta:
         ordered = True

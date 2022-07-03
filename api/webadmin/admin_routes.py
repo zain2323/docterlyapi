@@ -1,6 +1,6 @@
 from api import admin_manager as admin, db
 from api.models import (User, Doctor, Qualification, Specialization, Day, Role, Rating,
-                        PrescribedMedicines, Appointment, Slot, Patient, doctor_specializations)
+                         Appointment, Slot, Patient, doctor_specializations)
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import BaseView, expose
 from flask import redirect, url_for, flash
@@ -77,12 +77,12 @@ class SlotView(RestrictedAccess):
 
     column_searchable_list = ["day_id", "doctor_id"]
 
-class PrescribedMedicinesView(RestrictedAccess):
-    can_edit = False
-    can_delete = False
-    can_create = False
+# class PrescribedMedicinesView(RestrictedAccess):
+#     can_edit = False
+#     can_delete = False
+#     can_create = False
 
-    column_searchable_list = ["prescription_id", "medicine_name", "brand", "medicine_formula"]
+#     column_searchable_list = ["prescription_id", "medicine_name", "brand", "medicine_formula"]
 
 admin.add_view(UserView(User, db.session))
 admin.add_view(QualificationAndDoctorView(Qualification, db.session))
@@ -92,7 +92,7 @@ admin.add_view(DayView(Day, db.session))
 admin.add_view(RatingView(Rating, db.session))
 admin.add_view(AppointmentView(Appointment, db.session))
 admin.add_view(SlotView(Slot, db.session))
-admin.add_view(PrescribedMedicinesView(PrescribedMedicines, db.session))
+# admin.add_view(PrescribedMedicinesView(PrescribedMedicines, db.session))
 admin.add_view(DoctorView(Doctor, db.session))
 admin.add_view(PatientView(Patient, db.session))
 admin.add_view(LogoutView(name="Logout", endpoint="logout"))

@@ -12,7 +12,7 @@ def make_shell_context():
     return {
             "db": db, "User": User, "Doctor": Doctor, "Patient": Patient, "Specialization": Specialization,
             "Qualification": Qualification, "Day": Day, "Appointment": Appointment, "Slot": Slot,
-            "Rating": Rating, "Prescription": Prescription, "Role": Role, "PrescribedMedicines": PrescribedMedicines,
+            "Rating": Rating, "Role": Role,
             "doctor_specializations": doctor_specializations, "doctor_qualifications": doctor_qualifications,
             "BookedSlots": BookedSlots, "Event": Event, "EventMeta": EventMeta,
             "UserSchema": UserSchema, "DoctorSchema": DoctorSchema, "CreateNewDoctorSchema": CreateNewDoctorSchema,

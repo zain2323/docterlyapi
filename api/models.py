@@ -18,10 +18,10 @@ doctor_qualifications = db.Table("doctor_qualifications",
     db.Column('institute_name', db.String, nullable=False)
 )
 
-medical_history = db.Table("medical_history",
-    db.Column("patient_id", db.Integer, db.ForeignKey("patient.id", ondelete="CASCADE"), primary_key=True, nullable=False),
-    db.Column("prescription_id", db.Integer, db.ForeignKey("prescription.id", ondelete="CASCADE"), primary_key=True, nullable=False)
-)
+# medical_history = db.Table("medical_history",
+#     db.Column("patient_id", db.Integer, db.ForeignKey("patient.id", ondelete="CASCADE"), primary_key=True, nullable=False),
+#     db.Column("prescription_id", db.Integer, db.ForeignKey("prescription.id", ondelete="CASCADE"), primary_key=True, nullable=False)
+# )
 
 class Role(db.Model):
     __tablename__ = "role"
@@ -171,15 +171,15 @@ class Doctor(db.Model):
         }
         return info_dict
 
-class Prescription(db.Model):
-    __tablename__ = "prescription"
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
-    appointment_id = db.Column(db.Integer, db.ForeignKey("appointment.id"), nullable=False)
-    description = db.Column(db.String, nullable=False)
-    prescribed_medicines = db.relationship("PrescribedMedicines", backref="prescription", lazy=True)
+# class Prescription(db.Model):
+#     __tablename__ = "prescription"
+#     id = db.Column(db.Integer, primary_key=True, nullable=False)
+#     appointment_id = db.Column(db.Integer, db.ForeignKey("appointment.id"), nullable=False)
+#     description = db.Column(db.String, nullable=False)
+#     prescribed_medicines = db.relationship("PrescribedMedicines", backref="prescription", lazy=True)
 
-    def __repr__(self):
-        return f"appointment_id: {self.appointment_id}, description: {self.description}"
+#     def __repr__(self):
+#         return f"appointment_id: {self.appointment_id}, description: {self.description}"
 
 class Patient(db.Model):
     __tablename__ = "patient"
@@ -190,12 +190,12 @@ class Patient(db.Model):
     gender = db.Column(db.String(8), nullable=False)
     rating = db.relationship("Rating", backref="patient", lazy=True)
     appointment = db.relationship("Appointment", backref="patient", lazy=True)
-    history = db.relationship(
-        "Prescription", secondary=medical_history,
-        primaryjoin=(medical_history.c.patient_id == id),
-        secondaryjoin = (medical_history.c.prescription_id == Prescription.id),
-        backref=db.backref("patient", lazy="dynamic", cascade="all, delete")
-    )
+    # history = db.relationship(
+    #     "Prescription", secondary=medical_history,
+    #     primaryjoin=(medical_history.c.patient_id == id),
+    #     secondaryjoin = (medical_history.c.prescription_id == Prescription.id),
+    #     backref=db.backref("patient", lazy="dynamic", cascade="all, delete")
+    # )
     
     def __repr__(self):
         return f"Name: {self.name}"
@@ -223,7 +223,7 @@ class Appointment(db.Model):
     slot_id = db.Column(db.Integer, db.ForeignKey('slot.id'), nullable=False)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
-    prescription = db.relationship("Prescription", backref="appointment", lazy=True)
+    # prescription = db.relationship("Prescription", backref="appointment", lazy=True)
 
     def __repr__(self):
         return f"slot_id: {self.slot_id}, patient_id:{self.patient_id}"
@@ -292,14 +292,14 @@ class EventMeta(db.Model):
 
 # WHERE ( DATEDIFF( '2022-6-7', start_date ) % repeat_interval = 0)
 
-class PrescribedMedicines(db.Model):
-    __tablename = "prescribed_medicine"
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
-    prescription_id = db.Column(db.Integer, db.ForeignKey("prescription.id"), nullable=False)
-    medicine_name = db.Column(db.String, nullable=False)
-    medicine_formula = db.Column(db.String, nullable=False)
-    dosage = db.Column(db.String, nullable=False)
-    brand = db.Column(db.String, nullable=False)
+# class PrescribedMedicines(db.Model):
+#     __tablename = "prescribed_medicine"
+#     id = db.Column(db.Integer, primary_key=True, nullable=False)
+#     prescription_id = db.Column(db.Integer, db.ForeignKey("prescription.id"), nullable=False)
+#     medicine_name = db.Column(db.String, nullable=False)
+#     medicine_formula = db.Column(db.String, nullable=False)
+#     dosage = db.Column(db.String, nullable=False)
+#     brand = db.Column(db.String, nullable=False)
 
-    def __repr__(self):
-        return f"Medicine: {self.medicine_name}, Dosage: {self.dosage}"
+#     def __repr__(self):
+#         return f"Medicine: {self.medicine_name}, Dosage: {self.dosage}"
