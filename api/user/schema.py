@@ -13,8 +13,8 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     password = ma.String(reqired=True, validate=validate.Length(min=8), load_only=True)
     registered_at = ma.DateTime(dump_only=True)
     confirmed = ma.Boolean(dump_only=True)
-    dob = ma.Date(required=True)
-    gender = ma.String(required=True, validate=[validate.Length(max=8)])
+    # dob = ma.Date(required=True)
+    # gender = ma.String(required=True, validate=[validate.Length(max=8)])
     role = ma.String(required=True)
 
     @validates("email")
@@ -44,9 +44,9 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
         data["role"] = Role.query.filter_by(role_name=data['role']).first()
         return data
     
-    @validates("gender")
-    def validate_gender(self, value):
-        value = value.lower()
-        if value not in ["male", "female"]:
-            raise ValidationError("Invalid gender")
+    # @validates("gender")
+    # def validate_gender(self, value):
+    #     value = value.lower()
+    #     if value not in ["male", "female"]:
+    #         raise ValidationError("Invalid gender")
 

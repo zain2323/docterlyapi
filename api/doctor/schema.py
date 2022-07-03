@@ -39,9 +39,9 @@ class CreateNewDoctorSchema(ma.SQLAlchemySchema):
     name = ma.String(required=True, validate=[validate.Length(min=3, max=64)])
     email = ma.String(required=True, validate=[validate.Length(max=120), validate.Email()])
     password = ma.String(reqired=True, validate=validate.Length(min=8), load_only=True)
-    dob = ma.Date(required=True)
+    # dob = ma.Date(required=True)
     registered_at = ma.DateTime(dump_only=True)
-    gender = ma.String(required=True, validate=[validate.Length(max=8)])
+    # gender = ma.String(required=True, validate=[validate.Length(max=8)])
     role = ma.String(required=True)
     description = ma.String(required=True)
 

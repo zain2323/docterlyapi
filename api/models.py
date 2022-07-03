@@ -69,8 +69,8 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(102), nullable=False)
     registered_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     confirmed = db.Column(db.Boolean, default=False, nullable=False)
-    dob = db.Column(db.Date, nullable=False)
-    gender = db.Column(db.String(8), nullable=False)
+    # dob = db.Column(db.Date, nullable=False)
+    # gender = db.Column(db.String(8), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"), nullable=False)
     token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
@@ -155,9 +155,9 @@ class Doctor(db.Model):
         db.session.execute(statement)
     
     def get_doctor_qualifications_and_info(self):
-        query = db.select(doctor_qualifications.c.institute_name, doctor_qualifications.c.procurement_year)
+        query = db.select(doctor_qualifications.c.institute_name, doctor_qualifications.c.procurement_year).filter(doctor_qualifications.c.doctor_id == self.id)
         result = db.session.execute(query).all()
-
+        print(result)
         qualifications_list = self.qualifications
         procurement_year_list = []
         institute_name_list = [] 

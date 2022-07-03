@@ -2,7 +2,7 @@ from apifairy import authenticate, response, body
 from api.models import Specialization, Doctor, Qualification
 from api.misc import misc
 from api import token_auth
-from api.webadmin.schema import SpecializationSchema
+from api.webadmin.schema import SpecializationSchema, QualificationSchema
 from api.doctor.schema import DoctorSchema
 
 @misc.route("/specializations", methods=["GET"])
@@ -11,6 +11,13 @@ from api.doctor.schema import DoctorSchema
 def get_specializations():
     """Returns all the specializations"""
     return Specialization.query.all()
+
+@misc.route("/qualifications", methods=["GET"])
+@authenticate(token_auth)
+@response(QualificationSchema(many=True))
+def get_qualifications():
+    """Returns all the qualifications"""
+    return Qualification.query.all()
 
 @misc.route("/doctors/specialization/<int:specialization_id>")
 @authenticate(token_auth)

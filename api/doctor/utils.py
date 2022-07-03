@@ -6,7 +6,10 @@ from PIL import Image
 def get_experience(qualifications):
     # Returns the experience of the doctor by subracting the earliest date of degree procurement from the current date
     date_format = "%Y-%m-%d"
-    min_date = str(min(qualifications["procurement_year"]))
+    try:
+        min_date = str(min(qualifications["procurement_year"]))
+    except:
+        min_date = str(datetime.now().date())
     current_date = str(datetime.now().date())
 
     min_date = datetime.strptime(min_date, date_format)
