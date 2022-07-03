@@ -7,6 +7,7 @@ from api.patient import patient
 from api.doctor.schema import TimingsSchema
 from datetime import datetime, date , timedelta
 from api.doctor.utils import get_experience
+from flask import url_for
 
 @patient.route("/new", methods=["POST"])
 @authenticate(token_auth)
@@ -109,6 +110,9 @@ def appointment_history():
             response.append({"patient": patient, "doctor": doctor, "timings": timings})
     return response
 
+def generate_url(filename="default_doctor_img.jpg"):
+    return url_for("static", filename="doctor_profile_pics/"+filename, _external=True)
+
 def prepare_doctor_info(doctor):
     user = doctor.user
     id = doctor.id
@@ -116,5 +120,6 @@ def prepare_doctor_info(doctor):
     qualifications = doctor.get_doctor_qualifications_and_info()
     experience = get_experience(qualifications)    
     specializations = doctor.specializations[0]
-    return {"id": id, "description": description, "experience":experience, "specializations": specializations, 'qualifications': qualifications,  "user": user}
+    url = generate_url(filename=doctor.image)
+    return {"id": id, "description": description, "experience":experience, "image": url, "specializations": specializations, 'qualifications': qualifications,  "user": user}
 

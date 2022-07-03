@@ -8,8 +8,19 @@ from api.doctor.schema import (CreateNewDoctorSchema, DoctorSchema, doctors_sche
 from datetime import timedelta, date, datetime, time
 from api.commands.jobs import next_weekday
 from api.patient.schema import PatientSchema
-from flask import abort
-from api.doctor.utils import get_experience
+from flask import abort, request, jsonify, url_for
+from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = '/path/to/the/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def generate_url(filename="default_doctor_img.jpg"):
+    return url_for("static", filename="doctor_profile_pics/"+filename, _external=True)
 
 @doctor.route("/new", methods=["POST"])
 @body(CreateNewDoctorSchema)
@@ -20,12 +31,39 @@ def new(kwargs):
     new_user = User(**kwargs)
     password = kwargs["password"]
     new_user.set_password(password)
-    new_doctor = Doctor(user=new_user, description=description)
+    new_doctor = Doctor(user=new_user, description=description, image="default_doctor_image.jpg")
     db.session.add(new_doctor)
     db.session.add(new_user)
     db.session.commit()
     return new_doctor
 
+@doctor.route("/image/", methods=["POST"])
+@authenticate(token_auth)
+def upload_image():
+    """Uploads the profile picture of the currently authenticated doctor"""
+    current_user = token_auth.current_user()
+    doctor = current_user.doctor
+    if doctor == []:
+        abort(401)
+    doctor = doctor[0] 
+    if "file" not in request.files or request.files["image"].filename == "":
+       image = "default_doctor_img.jpg"
+    image = request.files["image"]
+    if image and allowed_file(image.filename):
+        filename = secure_filename(image.filename)
+        filename = generate_hex_name()
+        filename = save_picture(image, filename)
+    else:
+        resp = jsonify({"message": "Invalid file"})
+        return resp
+    # Fetching the old image
+    old_image = doctor.image
+    if image != "default_doctor_image.jpg":
+        delete_picture(old_image)
+    doctor.image = filename
+    db.session.commit()
+    return jsonify({"message": "profile picture changed"})
+        
 @doctor.route("/info", methods=["GET"])
 @authenticate(token_auth)
 @response(DoctorInfoSchema)
@@ -42,10 +80,14 @@ def prepare_doctor_info(doctor, qualifications_info):
     id = doctor.id
     description = doctor.description
     qualifications = qualifications_info
-    specializations = doctor.specializations[0]
+    try:
+        specializations = doctor.specializations[0]
+    except:
+        specializations = {}
     experience = get_experience(qualifications)
+    url = generate_url(filename=doctor.image)
     slot = doctor.slots
-    return {"id": id, "user": user, "description": description, "experience": experience, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
+    return {"id": id, "user": user, "description": description, "experience": experience, "image": url, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
 
 @doctor.route("/all", methods=["GET"])
 @authenticate(token_auth)

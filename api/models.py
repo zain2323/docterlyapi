@@ -117,7 +117,8 @@ class Doctor(db.Model):
     __tablename__ = "doctor"
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     description = db.Column(db.String, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    image = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"),)
     rating = db.relationship("Rating", backref="doctor", lazy=True)
     slots = db.relationship("Slot", backref="doctor", lazy=True)
     # Many to Many relationship between doctor and specializations

@@ -9,7 +9,7 @@ class ProductionConfig:
     FLASK_ADMIN_SWATCH = 'cyborg'
     JSON_SORT_KEYS = False
     SECRET_KEY = config.get("SECRET_KEY")
-    UPLOAD_FOLDER = './api/static/results'
+    UPLOAD_FOLDER = './api/static/doctor_profile_pics'
     MAIL_SERVER = "smtp.googlemail.com"
     MAIL_PORT = "587"
     MAIL_USE_TLS = "1"  
