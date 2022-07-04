@@ -36,7 +36,6 @@ jobs:
             # Exports the flask environment variable
             export FLASK_APP=app.py
             # Performs database migrations
-            flask db migrate
             flask db upgrade
             # Reloads the supervisorctl service so that the changes take effect
             sudo supervisorctl stop doctorly
