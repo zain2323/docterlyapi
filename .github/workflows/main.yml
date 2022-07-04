@@ -26,13 +26,19 @@ jobs:
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
           username: ${{ secrets.AZURE_VM_USERNAME }}
-          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          key: ${{ secrets.PRIVATEKEY }}
           port: 22
           script: |
-            cd doctorlyapi
+            cd docterlyapi/
             git pull
             source venv/bin/activate
             pip3 install -r requirements.txt
+            # Exports the flask environment variable
+            export FLASK_APP=app.py
+            # Performs database migrations
+            flask db migrate
+            flask db upgrade
             # Reloads the supervisorctl service so that the changes take effect
-            sudo supervisorctl reload
+            sudo supervisorctl stop doctorly
+            sudo supervisorctl start doctorly
             echo "Deployed successfully"
