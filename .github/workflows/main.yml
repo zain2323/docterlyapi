@@ -26,7 +26,7 @@ jobs:
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
           username: ${{ secrets.AZURE_VM_USERNAME }}
-          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          key: ${{ secrets.PRIVATEKEY }}
           port: 22
           script: |
             cd doctorlyapi
