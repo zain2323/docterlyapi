@@ -29,7 +29,7 @@ jobs:
           key: ${{ secrets.PRIVATEKEY }}
           port: 22
           script: |
-            cd doctorlyapi/
+            cd docterlyapi/
             git pull
             source venv/bin/activate
             pip3 install -r requirements.txt
@@ -39,5 +39,6 @@ jobs:
             flask db migrate
             flask db upgrade
             # Reloads the supervisorctl service so that the changes take effect
-            sudo supervisorctl reload
+            sudo supervisorctl stop doctorly
+            sudo supervisorctl start doctorly
             echo "Deployed successfully"
