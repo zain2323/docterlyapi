@@ -78,7 +78,7 @@ def create_admin_account():
     # gender = "male"
     role = Role.query.filter_by(role_name="admin").first()
     # dob = datetime(2002, 5, 22)
-    admin_account = User(name=name, email=email, password=password, confirmed=confirmed, gender=gender, role=role, dob=dob)
+    admin_account = User(name=name, email=email, password=password, confirmed=confirmed, role=role)
     admin_account.set_password(password)
     db.session.add(admin_account)
 
