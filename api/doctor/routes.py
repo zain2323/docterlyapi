@@ -12,7 +12,6 @@ from flask import abort, request, jsonify, url_for
 from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = '/path/to/the/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
@@ -58,7 +57,7 @@ def upload_image():
         return resp
     # Fetching the old image
     old_image = doctor.image
-    if image != "default_doctor_image.jpg":
+    if old_image != "default_doctor_image.jpg":
         delete_picture(old_image)
     doctor.image = filename
     db.session.commit()
@@ -71,9 +70,7 @@ def get_current_doctor_info():
     """Get the currently authenticated doctor's info"""
     current_user = token_auth.current_user()
     doctor = Doctor.query.filter_by(user=current_user).first_or_404()
-    print(doctor)
     qualifications_info = doctor.get_doctor_qualifications_and_info()
-    print(qualifications_info)
     doctor_info = prepare_doctor_info(doctor, qualifications_info)
     return doctor_info
 

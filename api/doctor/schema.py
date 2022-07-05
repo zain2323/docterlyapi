@@ -84,6 +84,13 @@ class DoctorSchema(ma.SQLAlchemyAutoSchema):
     qualifications = fields.Nested(DoctorQualifications(many=True))
     image = ma.Url(dump_only=True)
 
+    @post_dump(pass_many=True)
+    def wrap_with_dict(self, data, many, **kwargs):
+        if type(data) is list:
+            return {"data": data}
+        else:
+            return data
+
 class CreateNewSlot(ma.Schema):
     class Meta:
         ordered = True
@@ -144,8 +151,11 @@ class DoctorInfoSchema(ma.Schema):
     slot = fields.Nested(ReturnSlot(many=True))
 
     @post_dump(pass_many=True)
-    def wrap_with_envelope(self, data, many, **kwargs):
-        return {"data": data}
+    def wrap_with_dict(self, data, many, **kwargs):
+        if type(data) is list:
+            return {"data": data}
+        else:
+            return data
 
 class TimingsSchema(ma.Schema):
     class Meta:

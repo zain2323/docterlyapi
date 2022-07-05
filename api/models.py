@@ -36,6 +36,7 @@ class Specialization(db.Model):
     __tablename__ = "specialization"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False, index=True)
+    image = db.Column(db.String)
 
     def __repr__(self):
         return f"{self.name}"

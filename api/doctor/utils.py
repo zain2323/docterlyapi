@@ -17,14 +17,14 @@ def get_experience(qualifications):
 
     return int((abs(current_date - min_date).days)/365)
 
-def save_picture(image_data, img_name):
+def save_picture(image_data, img_name, loc='./api/static/doctor_profile_pics'):
     '''
     This saves the thumbnail picture of the product in the static/product_pictures directory.
     Picture is being renamed  to the randomly chosen 32 bit string in order to avoid the
     naming clash.
     '''
     try:
-        path = Path('./api/static/doctor_profile_pics')
+        path = Path(loc)
     except FileNotFoundError:
         raise FileNotFoundError("Path is invalid or does not exist.")
     try:
@@ -41,9 +41,9 @@ def save_picture(image_data, img_name):
     i.save(path)
     return image_name_with_ext
 
-def delete_picture(img_name):
+def delete_picture(img_name, loc="./api/static/doctor_profile_pics/"):
     try:
-        path = Path("./api/static/doctor_profile_pics/" + img_name)
+        path = Path(loc + img_name)
     except FileNotFoundError:
         raise FileNotFoundError("Path is invalid or does not exist.")
     if path.exists():
