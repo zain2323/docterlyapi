@@ -1,7 +1,7 @@
 from distutils.command.config import dump_file
 from api import ma, token_auth
 from api.models import Doctor, User, Specialization, Qualification, Slot, Role, Day
-from marshmallow import validate, validates, ValidationError, fields, post_load
+from marshmallow import validate, validates, ValidationError, fields, post_load, post_dump
 from api.webadmin.schema import SpecializationSchema, QualificationSchema
 from api.user.schema import UserSchema
 
@@ -142,6 +142,10 @@ class DoctorInfoSchema(ma.Schema):
     specializations = fields.Nested(SpecializationSchema())
     qualifications = fields.Nested(DoctorQualifications())
     slot = fields.Nested(ReturnSlot(many=True))
+
+    @post_dump(pass_many=True)
+    def wrap_with_envelope(self, data, many, **kwargs):
+        return {"data": data}
 
 class TimingsSchema(ma.Schema):
     class Meta:

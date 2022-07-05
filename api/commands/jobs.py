@@ -106,3 +106,4 @@ def insert_qualifications():
     for qualification in qualifications:
         qualification_db = Qualification(name=qualification.lower())
         db.session.add(qualification_db)
+

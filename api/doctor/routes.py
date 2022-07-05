@@ -104,6 +104,21 @@ def get_all():
         doctors_info.append(doctor_info)
     return doctors_info
 
+@doctor.route("/popular/doctors", methods=["GET"])
+@authenticate(token_auth)
+@response(DoctorInfoSchema(many=True))
+def get_popular_doctors():
+    import random
+    """Returns all the popular doctors"""
+    doctors_info = []
+    doctors = Doctor.query.all()
+    for doctor in doctors:
+        qualifications_info = doctor.get_doctor_qualifications_and_info()
+        doctor_info = prepare_doctor_info(doctor, qualifications_info)
+        doctors_info.append(doctor_info)
+    
+    return random.sample(doctors_info, 10)
+
 @doctor.route("/get/<int:id>", methods=["GET"])
 @authenticate(token_auth)
 @response(DoctorInfoSchema())
@@ -266,3 +281,5 @@ def get_appointment_patients(appointment_id):
     # Returning the list of patients
     patients = appointment.patient
     return patients
+
+
