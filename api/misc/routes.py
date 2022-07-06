@@ -105,19 +105,39 @@ def upload_image(specialization_id):
 @response(DoctorInfoSchema(many=True))
 def search(specialization_id):
     """Search any doctor with the name of the given specialization id"""
+    # Checks if the specialization exists
     specialization = Specialization.query.get(specialization_id)
     if specialization is None:
         return abort(404)
+    # Fetches the query parameter
     name = request.args.get("name", default=" ")
-    query = f"""SELECT doctor.id FROM doctor JOIN "user" ON "user"."id" = doctor.id WHERE "user".name LIKE'%{name}%';"""
-    result = db.session.execute(query).filter(Doctor.specializations.contains(specialization)).all()
+    # Fetches all the doctors id with the given specialization id
+    query_sp = f"""SELECT doctor_id FROM doctor_specializations WHERE specialization_id = {specialization_id}"""
+    result_sp = db.session.execute(query_sp).all()
+    result_sp = [r[0] for r in result_sp]
+    result_tup = to_tuple(result_sp)
+    # Fetches all the doctors whose name matches with given name and is in the list of the above fetched doctors
+    query_doc = f"""SELECT doctor.id FROM doctor JOIN "user" ON "user"."id" = doctor.id WHERE "user".name LIKE'%{name}%' AND doctor.id """ + result_tup
+    result = db.session.execute(query_doc).all()
+    doctors_db = []
+    # Get all the doctors fromthe fetched doctors id
     doctors = []
     for doc_id in result:
         doctor = Doctor.query.get(doc_id[0])
+        doctors_db.append(doctor)
+    # Constructs the doctors info schema
+    for doctor in doctors_db:
+        qualifications = doctor.get_doctor_qualifications_and_info()
+        doctor = prepare_doctor_info(doctor, qualifications)
         doctors.append(doctor)
-    sp_doctors = Doctor.query.filter(Doctor.specializations.contains(specialization)).all()
-    result = []
-    
     return doctors
+
+def to_tuple(doc_list):
+    if len(doc_list) > 1:
+        return f"""IN {tuple(doc_list)}"""
+    elif len(doc_list) == 0:
+        return """IN (NULL)"""
+    else:
+        return f"""= {doc_list[0]}"""
 
     
