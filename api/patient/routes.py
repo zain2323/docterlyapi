@@ -6,7 +6,7 @@ from apifairy import response, body, authenticate, other_responses
 from api.patient import patient
 from api.doctor.schema import TimingsSchema
 from datetime import datetime, date , timedelta
-from api.doctor.utils import get_experience
+from api.doctor.utils import get_experience, get_patient_count
 from flask import url_for
 
 @patient.route("/new", methods=["POST"])
@@ -122,5 +122,5 @@ def prepare_doctor_info(doctor):
     specializations = doctor.specializations[0]
     url = generate_url(filename=doctor.image)
     rating = "4.7"
-    return {"id": id, "description": description, "rating": rating, "experience":experience, "image": url, "specializations": specializations, 'qualifications': qualifications,  "user": user}
-
+    no_of_patients = get_patient_count(doctor)
+    return {"id": id, "description": description, "no_of_patients": no_of_patients, "rating": rating, "experience":experience, "image": url, "specializations": specializations, 'qualifications': qualifications,  "user": user}

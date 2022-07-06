@@ -49,9 +49,11 @@ def delete_picture(img_name, loc="./api/static/doctor_profile_pics/"):
     if path.exists():
         path.unlink()
 
-
 def generate_hex_name():
     '''
     Returns the 32 bit random digits
     '''
     return secrets.token_hex(32)
+
+def get_patient_count(doctor):
+    return len(doctor.user.patient)

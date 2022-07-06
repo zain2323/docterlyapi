@@ -9,7 +9,7 @@ from datetime import timedelta, date, datetime, time
 from api.commands.jobs import next_weekday
 from api.patient.schema import PatientSchema
 from flask import abort, request, jsonify, url_for
-from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture
+from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture, get_patient_count
 from werkzeug.utils import secure_filename
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -86,8 +86,9 @@ def prepare_doctor_info(doctor, qualifications_info):
     experience = get_experience(qualifications)
     url = generate_url(filename=doctor.image)
     rating = "4.7"
+    no_of_patients = get_patient_count(doctor)
     slot = doctor.slots
-    return {"id": id, "user": user, "description": description, "rating": rating, "experience": experience, "image": url, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
+    return {"id": id, "user": user, "description": description, "no_of_patients": no_of_patients, "rating": rating, "experience": experience, "image": url, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
 
 @doctor.route("/all", methods=["GET"])
 @authenticate(token_auth)
