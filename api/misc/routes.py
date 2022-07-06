@@ -28,8 +28,9 @@ def prepare_doctor_info(doctor, qualifications_info):
         specializations = {}
     experience = get_experience(qualifications)
     url = generate_url(filename=doctor.image)
+    rating = "4.7"
     slot = doctor.slots
-    return {"id": id, "user": user, "description": description, "experience": experience, "image": url, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
+    return {"id": id, "user": user, "description": description, "rating": rating, "experience": experience, "image": url, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
 
 
 @misc.route("/specializations", methods=["GET"])

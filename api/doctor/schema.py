@@ -146,6 +146,7 @@ class DoctorInfoSchema(ma.Schema):
     description = ma.String()
     image = ma.Url()
     experience = ma.Integer()
+    rating = ma.Float()
     specializations = fields.Nested(SpecializationSchema())
     qualifications = fields.Nested(DoctorQualifications())
     slot = fields.Nested(ReturnSlot(many=True))

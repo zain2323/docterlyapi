@@ -121,5 +121,6 @@ def prepare_doctor_info(doctor):
     experience = get_experience(qualifications)    
     specializations = doctor.specializations[0]
     url = generate_url(filename=doctor.image)
-    return {"id": id, "description": description, "experience":experience, "image": url, "specializations": specializations, 'qualifications': qualifications,  "user": user}
+    rating = "4.7"
+    return {"id": id, "description": description, "rating": rating, "experience":experience, "image": url, "specializations": specializations, 'qualifications': qualifications,  "user": user}
 
