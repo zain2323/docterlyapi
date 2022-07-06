@@ -3,7 +3,7 @@ from api.models import Specialization, Doctor, Qualification
 from api.misc import misc
 from api import token_auth, db
 from api.webadmin.schema import SpecializationSchema, QualificationSchema
-from api.doctor.schema import DoctorSchema
+from api.doctor.schema import DoctorSchema, DoctorInfoSchema
 from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture
 from werkzeug.utils import secure_filename
 from flask import abort, request, jsonify, url_for
@@ -13,6 +13,24 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def generate_url(filename="default_doctor_img.jpg"):
+    return url_for("static", filename="doctor_profile_pics/"+filename, _external=True)
+
+def prepare_doctor_info(doctor, qualifications_info):
+    user = doctor.user
+    id = doctor.id
+    description = doctor.description
+    qualifications = qualifications_info
+    try:
+        specializations = doctor.specializations[0]
+    except:
+        specializations = {}
+    experience = get_experience(qualifications)
+    url = generate_url(filename=doctor.image)
+    slot = doctor.slots
+    return {"id": id, "user": user, "description": description, "experience": experience, "image": url, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
+
 
 @misc.route("/specializations", methods=["GET"])
 @authenticate(token_auth)
@@ -30,19 +48,31 @@ def get_qualifications():
 
 @misc.route("/doctors/specialization/<int:specialization_id>")
 @authenticate(token_auth)
-@response(DoctorSchema(many=True))
+@response(DoctorInfoSchema(many=True))
 def get_doctors_by_specialization(specialization_id):
     """Returns all the doctors with the given specialization id"""
     specialization = Specialization.query.get_or_404(specialization_id)
-    return Doctor.query.filter(Doctor.specializations.contains(specialization)).all()
+    doctors = []
+    doctors_db = Doctor.query.filter(Doctor.specializations.contains(specialization)).all()
+    for doctor in doctors_db:
+        qualifications = doctor.get_doctor_qualifications_and_info()
+        doctor = prepare_doctor_info(doctor, qualifications)
+        doctors.append(doctor)
+    return doctors
 
 @misc.route("/doctors/qualification/<int:qualification_id>")
 @authenticate(token_auth)
-@response(DoctorSchema(many=True))
+@response(DoctorInfoSchema(many=True))
 def get_doctors_by_qualification(qualification_id):
     """Returns all the doctors with the given qualification id"""
     qualification = Qualification.query.get_or_404(qualification_id)
-    return Doctor.query.filter(Doctor.qualifications.contains(qualification)).all()
+    doctors_db = Doctor.query.filter(Doctor.qualifications.contains(qualification)).all()
+    doctors = []
+    for doctor in doctors_db:
+        qualifications = doctor.get_doctor_qualifications_and_info()
+        doctor = prepare_doctor_info(doctor, qualifications)
+        doctors.append(doctor)
+    return doctors
 
 
 @misc.route("/image/<int:specialization_id>", methods=["POST"])
@@ -69,3 +99,25 @@ def upload_image(specialization_id):
     specialization.image = filename
     db.session.commit()
     return jsonify({"message": "specialization picture changed"})
+
+@misc.route("/search/<int:specialization_id>", methods=["GET"])
+@authenticate(token_auth)
+@response(DoctorInfoSchema(many=True))
+def search(specialization_id):
+    """Search any doctor with the name of the given specialization id"""
+    specialization = Specialization.query.get(specialization_id)
+    if specialization is None:
+        return abort(404)
+    name = request.args.get("name", default=" ")
+    query = f"""SELECT doctor.id FROM doctor JOIN "user" ON "user"."id" = doctor.id WHERE "user".name LIKE'%{name}%';"""
+    result = db.session.execute(query).filter(Doctor.specializations.contains(specialization)).all()
+    doctors = []
+    for doc_id in result:
+        doctor = Doctor.query.get(doc_id[0])
+        doctors.append(doctor)
+    sp_doctors = Doctor.query.filter(Doctor.specializations.contains(specialization)).all()
+    result = []
+    
+    return doctors
+
+    
