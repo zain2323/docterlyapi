@@ -1,5 +1,5 @@
 from api import ma, token_auth
-from marshmallow import validate, validates, ValidationError, fields,validates_schema
+from marshmallow import validate, validates, ValidationError, fields,validates_schema, post_dump
 from api.models import Patient, Doctor, Event, Slot, Appointment
 from api.user.schema import UserSchema
 from api.doctor.schema import ReturnSlot, TimingsSchema, DoctorInfoSchema
@@ -16,6 +16,13 @@ class PatientSchema(ma.SQLAlchemyAutoSchema):
     age = ma.auto_field(required=True)
     gender = ma.auto_field(required=True, validate=[validate.Length(max=8)])
     user = fields.Nested(UserSchema, dump_only=True)
+
+    @post_dump(pass_many=True)
+    def wrap_with_dict(self, data, many, **kwargs):
+        if type(data) is list:
+            return {"data": data}
+        else:
+            return data
 
     @validates("name")
     def validate_name(self, value):
@@ -103,6 +110,13 @@ class AppointmentHistorySchema(ma.Schema):
     patient = fields.Nested(PatientSchema())
     doctor = fields.Nested(DoctorInfoSchema())
     timings = fields.Nested(TimingsSchema())
+
+    @post_dump(pass_many=True)
+    def wrap_with_dict(self, data, many, **kwargs):
+        if type(data) is list:
+            return {"data": data}
+        else:
+            return data
 
 patients_schema = PatientSchema(many=True)
     
