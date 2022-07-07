@@ -35,6 +35,11 @@ def create_scheduled_events():
             # Creating the new event
             new_event = Event(occurring_date=next_date, slot=slot)
             db.session.add(new_event)
+            # Creating the event meta
+            REPEAT_INTERVAL = 7 
+            start_date = event.occurring_date
+            event_meta = EventMeta(start_date=start_date, repeat_interval=REPEAT_INTERVAL, event=new_event)
+            db.session.add(event_meta)
             # Creating the new booked slot
             new_booked_slot = BookedSlots(event=new_event)
             db.session.add(new_booked_slot)
