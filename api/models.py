@@ -92,7 +92,8 @@ class User(db.Model, UserMixin):
     def verify_password(self,plain_password):
         return check_password_hash(self.password, plain_password)
 
-    def get_token(self, expires_in=3600):
+    def get_token(self, expires_in=31536000):
+        # token expires in a year
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             return self.token

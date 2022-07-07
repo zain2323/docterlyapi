@@ -1,9 +1,10 @@
 from api.commands import commands
-from api.models import Slot, BookedSlots, Event, EventMeta, User, Role, Day, Specialization, Qualification
+from api.models import Doctor, Slot, BookedSlots, Event, EventMeta, User, Role, Day, Specialization, Qualification
 from datetime import datetime, timedelta
 from api import db, api_fairy
 from json import dumps
 from flask import current_app
+from faker import Faker
 
 @commands.cli.command()
 def create_scheduled_events():
@@ -107,3 +108,34 @@ def insert_qualifications():
         qualification_db = Qualification(name=qualification.lower())
         db.session.add(qualification_db)
 
+@commands.cli.command()
+def create_fake_doctors():
+    fake = Faker()
+    n = 100
+    password = "testing123"
+    image = "default_doctor_image.jpg"
+    role = Role.query.filter_by(role_name="user").first()
+    qualifications_list = Qualification.query.all()
+    specialization_list = Specialization.query.all()
+    for _ in range(n):
+        qualification = fake.word(ext_word_list=qualifications_list)
+        procurement_year = datetime.strptime(fake.date(), "%Y-%m-%d").date()
+        institute_name = fake.word()
+        specialization = fake.word(ext_word_list=specialization_list)
+        name = fake.unique.name()
+        email = fake.unique.email()
+        description = fake.paragraph()
+        # User object
+        user = User(name=name, email=email, password=password, role=role)
+        user.set_password(password)
+        # db.session.add(user)
+        # Doctor object
+        doctor = Doctor(user=user, description=description, image=image)
+        # db.session.add(doctor)
+        # doctor.add_specialization(specialization)
+        # doctor.add_qualification(qualification, procurement_year, institute_name)
+        # db.session.commit()
+        print(user)
+        print(doctor)
+        print(specialization)
+        print(qualification)
