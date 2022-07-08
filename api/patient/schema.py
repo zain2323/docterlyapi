@@ -15,6 +15,7 @@ class PatientSchema(ma.SQLAlchemyAutoSchema):
     name = ma.auto_field(required=True, validate=[validate.Length(max=30)])
     age = ma.auto_field(required=True)
     gender = ma.auto_field(required=True, validate=[validate.Length(max=8)])
+    symptoms = ma.auto_field()
     user = fields.Nested(UserSchema, dump_only=True)
 
     @post_dump(pass_many=True)

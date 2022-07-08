@@ -191,6 +191,7 @@ class Patient(db.Model):
     name = db.Column(db.String(30), nullable=False)
     age = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(8), nullable=False)
+    symptoms = db.Column(db.String)
     rating = db.relationship("Rating", backref="patient", lazy=True)
     appointment = db.relationship("Appointment", backref="patient", lazy=True)
     # history = db.relationship(
