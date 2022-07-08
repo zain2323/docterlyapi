@@ -124,6 +124,13 @@ class ReturnSlot(ma.Schema):
     appointment_duration = ma.Integer()
     num_slots = ma.Integer()
 
+    @post_dump(pass_many=True)
+    def wrap_with_dict(self, data, many, **kwargs):
+        if type(data) is list:
+            return {"data": data}
+        else:
+            return data
+
 # This will be used for temporary purpose to support the UI
 # Will be removed later in future versions
 class SlotSchema(ma.Schema):
@@ -165,3 +172,10 @@ class TimingsSchema(ma.Schema):
     slot = fields.Nested(ReturnSlot())
     occurring_date = ma.Date()
     slots_booked = ma.Integer()
+
+    @post_dump(pass_many=True)
+    def wrap_with_dict(self, data, many, **kwargs):
+        if type(data) is list:
+            return {"data": data}
+        else:
+            return data
