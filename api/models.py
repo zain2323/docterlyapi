@@ -108,7 +108,9 @@ class User(db.Model, UserMixin):
     @staticmethod
     def verify_token(token):
         user = User.query.filter_by(token=token).first()
-        if user is None or user.token != token or user.token_expiration < datetime.utcnow():
+        # Removed token expiration
+        #  or user.token_expiration < datetime.utcnow()
+        if user is None or user.token != token:
             return None
         return user
     
