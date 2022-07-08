@@ -280,5 +280,3 @@ def get_appointment_patients(appointment_id):
     # Returning the list of patients
     patients = appointment.patient
     return patients
-
-

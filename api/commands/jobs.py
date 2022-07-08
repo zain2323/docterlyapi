@@ -25,7 +25,8 @@ def create_scheduled_events():
         # If the current date is equal to the next date then we only need to create new event when there is some time left.
         # If they are not equal and the next date is greater than the current date, then this means
         # we need to create new event    
-        if (current_occurring_date < next_date) or (current_occurring_date == next_date and end < current_time):
+        # or (current_occurring_date == next_date and end < current_time)
+        if (current_occurring_date < next_date):
             # Fetch the current event meta
             event_meta = event.get_event_meta()
             interval = event_meta.repeat_interval
