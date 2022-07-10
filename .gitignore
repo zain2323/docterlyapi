@@ -8,8 +8,10 @@ api/data.db
 # C extensions
 *.so
 #Log files
-logs/
-db_dump/
+logs/*
+db_dump/*
+!logs/.gitkeep 
+!db_dump/.gitkeep 
 
 # Distribution / packaging
 .Python
