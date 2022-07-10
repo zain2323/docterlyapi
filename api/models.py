@@ -122,7 +122,7 @@ class Doctor(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     description = db.Column(db.String)
     image = db.Column(db.String, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"),)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), index=True)
     rating = db.relationship("Rating", backref="doctor", lazy=True)
     slots = db.relationship("Slot", backref="doctor", lazy=True)
     # Many to Many relationship between doctor and specializations
@@ -189,10 +189,10 @@ class Doctor(db.Model):
 class Patient(db.Model):
     __tablename__ = "patient"
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    name = db.Column(db.String(30), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    name = db.Column(db.String(30), nullable=False, index=True)
     age = db.Column(db.Integer, nullable=False)
-    gender = db.Column(db.String(8), nullable=False)
+    gender = db.Column(db.String(8), nullable=False, index=True)
     symptoms = db.Column(db.String)
     rating = db.relationship("Rating", backref="patient", lazy=True)
     appointment = db.relationship("Appointment", backref="patient", lazy=True)
@@ -212,8 +212,8 @@ class Rating(db.Model):
         db.CheckConstraint("rating < 6"),
     )
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    doctor_id = db.Column(db.Integer, db.ForeignKey("doctor.id"), nullable=False)
-    patient_id = db.Column(db.Integer, db.ForeignKey("patient.id"), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey("doctor.id"), nullable=False, index=True)
+    patient_id = db.Column(db.Integer, db.ForeignKey("patient.id"), nullable=False, index=True)
     rating = db.Column(db.Integer, nullable=False)
     review = db.Column(db.String, nullable=False)
 
@@ -237,8 +237,8 @@ class Appointment(db.Model):
 class Slot(db.Model):
     __tablename__ = "slot"
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    day_id = db.Column(db.Integer, db.ForeignKey('day.id'), nullable=False)
-    doctor_id = db.Column(db.Integer, db.ForeignKey("doctor.id"), nullable=False)
+    day_id = db.Column(db.Integer, db.ForeignKey('day.id'), nullable=False, index=True)
+    doctor_id = db.Column(db.Integer, db.ForeignKey("doctor.id"), nullable=False, index=True)
     start = db.Column(db.Time, nullable=False)
     end = db.Column(db.Time, nullable=False)
     consultation_fee = db.Column(db.Integer, nullable=False)
@@ -256,7 +256,7 @@ class Slot(db.Model):
 class BookedSlots(db.Model):
     __tablename__ = "booked_slots"
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    event_id = db.Column(db.ForeignKey("event.id"), nullable=False)
+    event_id = db.Column(db.ForeignKey("event.id"), nullable=False, index=True)
     slots_booked = db.Column(db.Integer, default=0)
 
     def increment_slot(self):
@@ -272,7 +272,7 @@ class Event(db.Model):
     )
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     occurring_date = db.Column(db.Date, nullable=False)
-    slot_id = db.Column(db.ForeignKey("slot.id"), nullable=False)
+    slot_id = db.Column(db.ForeignKey("slot.id"), nullable=False, index=True)
     event_meta = db.relationship("EventMeta", backref="event", lazy=True)
     booked_slots = db.relationship("BookedSlots", backref="event", lazy=True)
     appointment = db.relationship("Appointment", backref="event", lazy=True)
@@ -289,7 +289,7 @@ class Event(db.Model):
 class EventMeta(db.Model):
     __tablename__ = "event_meta"
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False, index=True)
     start_date = db.Column(db.Date, nullable=False)    
     repeat_interval = db.Column(db.Integer, nullable=False)
     

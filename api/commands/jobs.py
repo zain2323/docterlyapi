@@ -45,6 +45,8 @@ def create_scheduled_events():
             new_booked_slot = BookedSlots(event=new_event)
             db.session.add(new_booked_slot)
             db.session.commit()
+            print("Added event")
+    print("Job executed")
 
 def next_weekday(date, weekday):
     days_ahead = weekday - date.isoweekday()
@@ -145,3 +147,12 @@ def create_fake_doctors():
         print(doctor)
         print(specialization)
         print(qualification)
+
+@commands.cli.command()
+def testing_job():
+    import time
+    print("Starting date is", datetime.now())
+    print("Sleeping for 5 seconds")
+    time.sleep(5)
+    print("Task executed..")
+    print("Ending date is", datetime.now())
