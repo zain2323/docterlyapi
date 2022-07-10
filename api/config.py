@@ -18,6 +18,7 @@ class ProductionConfig:
     ADMINS = [config.get("EMAIL")]
     FLASK_ENV = "production"
     TESTING = False
+    PGPASSWORD = config.get("PGPASSWORD")
     SQLALCHEMY_DATABASE_URI = f'postgresql://{config.get("DB_ROLE")}:{config.get("DB_PASSWORD")}@{config.get("HOST")}/{config.get("DB_NAME")}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

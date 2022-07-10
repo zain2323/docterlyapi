@@ -156,3 +156,12 @@ def testing_job():
     time.sleep(5)
     print("Task executed..")
     print("Ending date is", datetime.now())
+
+@commands.cli.command()
+def backup_database():
+    import os
+    filename = f'{datetime.now().date()}_dumpfile'
+    pwd = current_app.config["PGPASSWORD"]
+    cmd = f'''PGPASSWORD={pwd} pg_dump -U postgres -d doctorly_db > /home/zain2323/docterlyapi/db_dump/{filename}'''
+    os.system(cmd)
+    print("executed")
