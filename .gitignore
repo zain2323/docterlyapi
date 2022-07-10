@@ -7,6 +7,9 @@ __pycache__/
 api/data.db
 # C extensions
 *.so
+#Log files
+logs/
+db_dump/
 
 # Distribution / packaging
 .Python
