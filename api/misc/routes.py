@@ -113,22 +113,21 @@ def search(specialization_id):
         return abort(404)
     # Fetches the query parameter
     names_splitted = request.args.get("name", default=" ").split(' ')
-    name = parse_names(names_splitted)
+    # name = parse_names(names_splitted)
+    name = names_splitted
     # Fetches all the doctors id with the given specialization id
     query_sp = f"""SELECT doctor_id FROM doctor_specializations WHERE specialization_id = {specialization_id}"""
     result_sp = db.session.execute(query_sp).all()
     result_sp = [r[0] for r in result_sp]
     result_tup = to_tuple(result_sp)
     # Fetches all the doctors whose name matches with given name and is in the list of the above fetched doctors
-    query_doc = f"""SELECT doctor.id FROM doctor JOIN "user" ON "user"."id" = doctor.id AND doctor.id {result_tup}  WHERE to_tsvector('english', "user".name) @@ to_tsquery('{name}')"""
+    query_doc = f"""SELECT doctor.id FROM doctor JOIN "user" ON "user"."id" = doctor.user_id AND doctor.id {result_tup}  WHERE to_tsvector('english', "user".name) @@ to_tsquery('{name}')"""
     result = db.session.execute(query_doc).all()
     doctors_db = []
     # Get all the doctors fromthe fetched doctors id
     doctors = []
     for doc_id in result:
-        print(doc_id)
         doctor = Doctor.query.get(doc_id[0])
-        print(doctor)
         doctors_db.append(doctor)
     # Constructs the doctors info schema
     for doctor in doctors_db:
@@ -163,17 +162,17 @@ def search_by_specialization_and_name(specialization_id):
             doctors.append(doctor)
         return doctors
     else:
-        name = parse_names(name)
+        # name = parse_names(name)
         # Fetches all the doctors id with the given specialization id
         query_sp = f"""SELECT doctor_id FROM doctor_specializations WHERE specialization_id = {specialization_id}"""
         result_sp = db.session.execute(query_sp).all()
         result_sp = [r[0] for r in result_sp]
         result_tup = to_tuple(result_sp)
         # Fetches all the doctors whose name matches with given name and is in the list of the above fetched doctors
-        query_doc = f"""SELECT doctor.id FROM doctor JOIN "user" ON "user"."id" = doctor.id AND doctor.id {result_tup}  WHERE to_tsvector('english', "user".name) @@ to_tsquery('{name}')"""
+        query_doc = f"""SELECT doctor.id FROM doctor JOIN "user" ON "user"."id" = doctor.user_id AND doctor.id {result_tup}  WHERE to_tsvector('english', "user".name) @@ to_tsquery('{name}')"""
         result = db.session.execute(query_doc).all()
         doctors_db = []
-        # Get all the doctors fromthe fetched doctors id
+        # Get all the doctors from the fetched doctors id
         doctors = []
         for doc_id in result:
             doctor = Doctor.query.get(doc_id[0])

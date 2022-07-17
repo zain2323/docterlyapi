@@ -107,7 +107,7 @@ def insert_specializations():
                         "Psychiatrists", "Pulmonologist", "Radiologist", "Rheumatologist", "Sleep medicine specialist", 
                         "Sports Medicine Specialist", "General Surgeon", "Urologist"]
     for specialization in specializations:
-        specialization_db = Specialization(name=specialization.lower())
+        specialization_db = Specialization(name=specialization.lower(), image="allergist.jpg")
         db.session.add(specialization_db)
 
 def insert_qualifications():
