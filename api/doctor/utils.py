@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 import secrets
 from PIL import Image
+from api import db
 
 def get_experience(qualifications):
     # Returns the experience of the doctor by subracting the earliest date of degree procurement from the current date
