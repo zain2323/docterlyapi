@@ -56,4 +56,14 @@ def generate_hex_name():
     return secrets.token_hex(32)
 
 def get_patient_count(doctor):
-    return len(doctor.user.patient)
+    id = doctor.id
+    query = f"""SELECT COUNT(*) FROM doctor d
+JOIN "user" u
+ON u.id = d.user_id
+JOIN slot s
+ON s.doctor_id = d.id
+JOIN appointment a
+On a.slot_id = s.id
+WHERE d.id = {id};"""
+    return db.session.execute(query).all()[0][0]
+    
