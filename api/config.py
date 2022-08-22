@@ -21,6 +21,13 @@ class ProductionConfig:
     PGPASSWORD = config.get("PGPASSWORD")
     SQLALCHEMY_DATABASE_URI = f'postgresql://{config.get("DB_ROLE")}:{config.get("DB_PASSWORD")}@{config.get("HOST")}/{config.get("DB_NAME")}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Redis config
+    CACHE_TYPE = "redis"
+    CACHE_REDIS_HOST = "redis"
+    CACHE_REDIS_PORT = "6379"
+    CACHE_REDIS_DB = "0"
+    CACHE_REDIS_URL = "redis://localhost:6379/0"
+    CACHE_DEFAULT_TIMEOUT = "500"
 
 class DevelopmentConfig:
     FLASK_ENV = "development"

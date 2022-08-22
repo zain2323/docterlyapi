@@ -1,7 +1,7 @@
 from apifairy import authenticate, response, body
 from api.models import Specialization, Doctor, Qualification
 from api.misc import misc
-from api import token_auth, db
+from api import token_auth, db, cache
 from api.webadmin.schema import SpecializationSchema, QualificationSchema
 from api.doctor.schema import DoctorSchema, DoctorInfoSchema
 from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture, get_patient_count
@@ -36,6 +36,7 @@ def prepare_doctor_info(doctor, qualifications_info):
 
 @misc.route("/specializations", methods=["GET"])
 @authenticate(token_auth)
+@cache.cached(timeout=0, key_prefix="specializations")
 @response(SpecializationSchema(many=True))
 def get_specializations():
     """Returns all the specializations"""
@@ -43,6 +44,7 @@ def get_specializations():
 
 @misc.route("/qualifications", methods=["GET"])
 @authenticate(token_auth)
+@cache.cached(timeout=0, key_prefix="qualifications")
 @response(QualificationSchema(many=True))
 def get_qualifications():
     """Returns all the qualifications"""

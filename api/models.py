@@ -161,7 +161,6 @@ class Doctor(db.Model):
     def get_doctor_qualifications_and_info(self):
         query = db.select(doctor_qualifications.c.institute_name, doctor_qualifications.c.procurement_year).filter(doctor_qualifications.c.doctor_id == self.id)
         result = db.session.execute(query).all()
-        print(result)
         qualifications_list = self.qualifications
         procurement_year_list = []
         institute_name_list = [] 

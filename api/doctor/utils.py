@@ -4,6 +4,8 @@ import secrets
 from PIL import Image
 from api import db
 
+IS_DOCTOR_CACHE_NEEDS_TO_UPDATE = False
+
 def get_experience(qualifications):
     # Returns the experience of the doctor by subracting the earliest date of degree procurement from the current date
     date_format = "%Y-%m-%d"
@@ -58,13 +60,20 @@ def generate_hex_name():
 
 def get_patient_count(doctor):
     id = doctor.id
-    query = f"""SELECT COUNT(*) FROM doctor d
-JOIN "user" u
-ON u.id = d.user_id
-JOIN slot s
-ON s.doctor_id = d.id
-JOIN appointment a
-On a.slot_id = s.id
-WHERE d.id = {id};"""
+    query = f"""SELECT COUNT(*) FROM doctor d JOIN "user" u ON u.id = d.user_id JOIN slot s ON s.doctor_id = d.id JOIN appointment a On a.slot_id = s.id WHERE d.id = {id};"""
     return db.session.execute(query).all()[0][0]
-    
+
+# Does cached list of doctor needs to update?
+def does_doctor_cache_needs_update():
+    try:
+        IS_DOCTOR_CACHE_NEEDS_TO_UPDATE
+    except:
+        IS_DOCTOR_CACHE_NEEDS_TO_UPDATE = False
+    if IS_DOCTOR_CACHE_NEEDS_TO_UPDATE:
+        IS_DOCTOR_CACHE_NEEDS_TO_UPDATE = False
+        return True
+    return False
+
+def update_doctor_cache(update=False):
+    IS_DOCTOR_CACHE_NEEDS_TO_UPDATE = update
+

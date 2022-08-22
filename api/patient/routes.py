@@ -1,7 +1,7 @@
 from api.patient.schema import (PatientSchema, patients_schema, AppointmentSchema,
          ReturnAppointmentSchema, AppointmentHistorySchema)
 from api.models import Patient, User, BookedSlots, Event, Slot, Appointment
-from api import token_auth, db 
+from api import token_auth, db, cache
 from apifairy import response, body, authenticate, other_responses
 from api.patient import patient
 from api.doctor.schema import TimingsSchema
@@ -24,6 +24,7 @@ def new(kwargs):
 
 @patient.route("/info", methods=["GET"])
 @authenticate(token_auth)
+@cache.cached(key_prefix="all_patients")
 @response(patients_schema, 200)
 def get_all_patients():
     """Get all patients of the authenticated user"""

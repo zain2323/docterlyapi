@@ -9,7 +9,7 @@ def generate_url(filename="allergist.jpg"):
 class QualificationSchema(ma.Schema):
     class Meta:
         ordered = True
-    id = ma.Integer(dump_only=True)
+    id = ma.Integer()
     name = ma.String(required=True, validate=[validate.Length(max=50)])
     
     @post_dump(pass_many=True)
@@ -22,7 +22,7 @@ class QualificationSchema(ma.Schema):
 class SpecializationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         ordered = True
-    id = ma.Integer(dump_only=True)
+    id = ma.Integer()
     name = ma.String(required=True, validate=[validate.Length(max=50)])
     image = ma.Url()
     
@@ -35,7 +35,6 @@ class SpecializationSchema(ma.SQLAlchemyAutoSchema):
     
     @post_dump
     def transform_image_to_url(self, data, **kwargs):
-        print("****", data)
         if data.get("image") is not None:
             data["image"] = generate_url(filename=data["image"])
         return data

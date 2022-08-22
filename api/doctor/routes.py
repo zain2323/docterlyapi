@@ -1,6 +1,6 @@
 from api.models import (Doctor, User, Specialization, Qualification, doctor_qualifications, Slot, Day,
-                        Event, EventMeta, BookedSlots, Appointment)    
-from api import db, basic_auth, token_auth
+                        Event, EventMeta, BookedSlots, Appointment, Patient)    
+from api import db, basic_auth, token_auth, cache
 from apifairy import response, other_responses, body, authenticate
 from api.doctor import doctor
 from api.doctor.schema import (CreateNewDoctorSchema, DoctorSchema, doctors_schema, 
@@ -9,8 +9,10 @@ from datetime import timedelta, date, datetime, time
 from api.commands.jobs import next_weekday
 from api.patient.schema import PatientSchema
 from flask import abort, request, jsonify, url_for
-from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture, get_patient_count
+from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture, get_patient_count, update_doctor_cache, does_doctor_cache_needs_update
 from werkzeug.utils import secure_filename
+from marshmallow import INCLUDE
+from math import ceil
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
@@ -20,6 +22,34 @@ def allowed_file(filename):
 
 def generate_url(filename="default_doctor_img.jpg"):
     return url_for("static", filename="doctor_profile_pics/"+filename, _external=True)
+
+def cache_response_with_id(prefix):
+    def cache_it(function):
+        def inner(id):
+            CACHE_KEY = prefix + str(id)
+            if cache.has(CACHE_KEY):
+                data = cache.get(CACHE_KEY)
+                return jsonify(data)
+            else:
+                return function(id)
+        inner.__name__ = function.__name__
+        return inner
+    return cache_it
+
+def cache_response_with_token(prefix, token):
+    def cache_it(function):
+        def inner():
+            current_user = token.current_user()
+            CACHE_KEY  = prefix + current_user.get_token()
+            if cache.has(CACHE_KEY):
+                data = cache.get(CACHE_KEY)
+                return jsonify(data)
+            else:
+                return function()
+        inner.__name__ = function.__name__
+        return inner
+    return cache_it
+
 
 @doctor.route("/new", methods=["POST"])
 @body(CreateNewDoctorSchema)
@@ -34,6 +64,7 @@ def new(kwargs):
     db.session.add(new_doctor)
     db.session.add(new_user)
     db.session.commit()
+    update_doctor_cache(update=True)
     return new_doctor
 
 @doctor.route("/image/", methods=["POST"])
@@ -65,13 +96,16 @@ def upload_image():
         
 @doctor.route("/info", methods=["GET"])
 @authenticate(token_auth)
+@cache_response_with_token(prefix="current_user", token=token_auth)
 @response(DoctorInfoSchema)
 def get_current_doctor_info():
     """Get the currently authenticated doctor's info"""
     current_user = token_auth.current_user()
+    CACHE_KEY  = "current_user" + current_user.get_token()
     doctor = Doctor.query.filter_by(user=current_user).first_or_404()
     qualifications_info = doctor.get_doctor_qualifications_and_info()
     doctor_info = prepare_doctor_info(doctor, qualifications_info)
+    cache.set(CACHE_KEY, DoctorInfoSchema().dump(doctor_info))
     return doctor_info
 
 def prepare_doctor_info(doctor, qualifications_info):
@@ -92,6 +126,7 @@ def prepare_doctor_info(doctor, qualifications_info):
 
 @doctor.route("/all", methods=["GET"])
 @authenticate(token_auth)
+@cache.cached(timeout=0, key_prefix="registered_doctors", forced_update=does_doctor_cache_needs_update)
 @response(DoctorInfoSchema(many=True))
 def get_all():
     """Returns all the registered doctors"""
@@ -105,6 +140,7 @@ def get_all():
 
 @doctor.route("/popular/doctors", methods=["GET"])
 @authenticate(token_auth)
+@cache.cached(timeout=10000, key_prefix="popular_doctors")
 @response(DoctorInfoSchema(many=True))
 def get_popular_doctors():
     import random
@@ -115,18 +151,21 @@ def get_popular_doctors():
         qualifications_info = doctor.get_doctor_qualifications_and_info()
         doctor_info = prepare_doctor_info(doctor, qualifications_info)
         doctors_info.append(doctor_info)
-    
-    return random.sample(doctors_info, 10)
+    sample_length = ceil(0.1 * len(doctors_info))
+    return random.sample(doctors_info, sample_length)
 
 @doctor.route("/get/<int:id>", methods=["GET"])
 @authenticate(token_auth)
+@cache_response_with_id(prefix="doctor_id")
 @response(DoctorInfoSchema())
 @other_responses({404: "Doctor not found"})
 def get_doctor(id):
     """Get doctor by the id"""
+    CACHE_KEY = "doctor_id" + str(id)
     doctor = Doctor.query.get_or_404(id)
     qualifications_info = doctor.get_doctor_qualifications_and_info()
     doctor_info = prepare_doctor_info(doctor, qualifications_info)
+    cache.set((CACHE_KEY), DoctorInfoSchema().dump(doctor_info))
     return doctor_info
 
 @doctor.route("/add_specializations", methods=["POST"])
@@ -218,12 +257,14 @@ def create_event_meta(event):
     event_meta = EventMeta(start_date=start_date, repeat_interval=REPEAT_INTERVAL, event=event)
     db.session.add(event_meta)
 
-@doctor.route("/timings/<int:doctor_id>")
+@doctor.route("/timings/<int:id>")
 @authenticate(token_auth)
+@cache_response_with_id(prefix="doctor_sitting_date")
 @response(TimingsSchema(many=True))
-def get_doctors_next_sitting_date(doctor_id):
+def get_doctors_next_sitting_date(id):
     """Return all the doctor's next sitting date with the given id"""
-    doctor = Doctor.query.get_or_404(doctor_id)
+    CACHE_KEY = "doctor_sitting_date" + str(id)
+    doctor = Doctor.query.get_or_404(id)
     slots = doctor.slots
     response = []
     for slot in slots:
@@ -232,18 +273,24 @@ def get_doctors_next_sitting_date(doctor_id):
         # Getting number of slots booked til now 
         slots_booked = event.get_latest_event_info().slots_booked
         response.append({"slot": slot, "occurring_date": occurring_date, "slots_booked": slots_booked})
+    cache.set(CACHE_KEY, TimingsSchema(many=True).dump(response))
     return response
 
-@doctor.route("/slot/<int:doctor_id>")
+@doctor.route("/slot/<int:id>")
 @authenticate(token_auth)
+@cache_response_with_id(prefix="doctor_slots")
 @response(ReturnSlot(many=True))
-def get_available_slots(doctor_id):
+def get_available_slots(id):
     """Return all the available slots of the doctor with the given id"""
-    doctor = Doctor.query.get_or_404(doctor_id)
-    return doctor.slots
+    CACHE_KEY = "doctor_slots" + str(id)
+    doctor = Doctor.query.get_or_404(id)
+    response = doctor.slots
+    cache.set(CACHE_KEY, ReturnSlot(many=True).dump(response))
+    return response
 
 @doctor.route("/patients", methods=["GET"])
 @authenticate(token_auth)
+@cache_response_with_token(prefix="doctor_patients", token=token_auth)
 @response(PatientSchema(many=True))
 def get_all_patients():
     """Returns all of your patients"""
@@ -251,32 +298,36 @@ def get_all_patients():
     doctor = current_user.doctor
     if doctor == []:
         abort(401)
+    CACHE_KEY = "doctor_patients" + current_user.get_token()
     slots = doctor[0].slots
     patients = []
     for slot in slots:
         appointments = slot.appointment
         for appointment in appointments:
-            patient = Patient.query.filter_by(appointment-appointment).first()
+            patient = Patient.query.filter_by(id=appointment.patient_id).first()
             patients.append(patient)
+    cache.set(CACHE_KEY, PatientSchema(many=True).dump(patients))
     return patients
-            
-@doctor.route("/patients/<int:appointment_id>")
+
+@doctor.route("/patients/<int:id>")
 @authenticate(token_auth)
 @response(PatientSchema(many=True))
-def get_appointment_patients(appointment_id):
+def get_appointment_patients(id):
     """Returns all the patients of the particular appointment id of the currently authenticated doctor"""
     current_user = token_auth.current_user()
     doctor = current_user.doctor
     if doctor == []:
         abort(401)
     # Verifying the appointment id belongs to the current doctor
+    CACHE_KEY = "doctor_appointments" + current_user.get_token()
     slots = doctor[0].slots
     appointments = []
     for slot in slots:
         apppointments = slot.appointment
-    given_appointment = Appointment.query.get(appointment_id)
+    given_appointment = Appointment.query.get(id)
     if  given_appointment not in appointments:
         abort(401)
     # Returning the list of patients
     patients = appointment.patient
+    cache.set(CACHE_KEY, PatientSchema(many=True).dump(patients))
     return patients

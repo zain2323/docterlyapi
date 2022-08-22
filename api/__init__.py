@@ -8,6 +8,7 @@ from flask_admin import Admin
 from flask_login import LoginManager
 from api.config import ProductionConfig as Config
 from flask_admin.base import AdminIndexView
+from flask_caching import Cache
 
 api_fairy = APIFairy()
 db = SQLAlchemy()
@@ -19,6 +20,7 @@ admin_manager = Admin()
 login_manager = LoginManager()
 login_manager.login_view = "admin.sign_in"
 login_manager.login_message_category = "info"
+cache = Cache()
 
 def create_app(config=Config):
     app = Flask(__name__)
@@ -33,6 +35,7 @@ def initialize_extensions(app):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    cache.init_app(app)
 
     # Restricting the admin panel index route
     from flask_login import current_user

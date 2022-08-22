@@ -1,7 +1,7 @@
 from distutils.command.config import dump_file
 from api import ma, token_auth
 from api.models import Doctor, User, Specialization, Qualification, Slot, Role, Day
-from marshmallow import validate, validates, ValidationError, fields, post_load, post_dump
+from marshmallow import validate, validates, ValidationError, fields, post_load, post_dump, INCLUDE
 from api.webadmin.schema import SpecializationSchema, QualificationSchema
 from api.user.schema import UserSchema
 
@@ -112,7 +112,6 @@ class CreateNewSlot(ma.Schema):
         data["day"] = Day.query.filter_by(name=data["day"].lower()).first()
         return data
 
-# Not using it as of now because implementing this schema will require heavy changes in the UI   
 class ReturnSlot(ma.Schema):
     class Meta:
         ordered = True
@@ -124,30 +123,20 @@ class ReturnSlot(ma.Schema):
     appointment_duration = ma.Integer()
     num_slots = ma.Integer()
 
-    @post_dump(pass_many=True)
-    def wrap_with_dict(self, data, many, **kwargs):
-        if type(data) is list:
-            return {"slot_data": data}
-        else:
-            return data
-
-# This will be used for temporary purpose to support the UI
-# Will be removed later in future versions
-class SlotSchema(ma.Schema):
-    class Meta:
-        ordered = True
-    day = ma.List(ma.String())
-    start = ma.Time(format="%H:%M")
-    end = ma.Time(format="%H:%M")
-    consultation_fee = ma.Integer()
-    appointment_duration = ma.Integer()
-    num_slots = ma.Integer()
+    # @post_dump(pass_many=True)
+    # def wrap_with_dict(self, data, many, **kwargs):
+    #     if type(data) is list:
+    #         return {"slot_data": data}
+    #     else:
+    #         return data
 
 doctors_schema = DoctorSchema(many=True)
 
 class DoctorInfoSchema(ma.Schema):
     class Meta:
         ordered = True
+        unknown = INCLUDE
+
     id = ma.Integer()
     user = fields.Nested(UserSchema())
     description = ma.String()
