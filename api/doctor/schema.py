@@ -123,12 +123,12 @@ class ReturnSlot(ma.Schema):
     appointment_duration = ma.Integer()
     num_slots = ma.Integer()
 
-    # @post_dump(pass_many=True)
-    # def wrap_with_dict(self, data, many, **kwargs):
-    #     if type(data) is list:
-    #         return {"slot_data": data}
-    #     else:
-    #         return data
+    @post_dump(pass_many=True)
+    def wrap_with_dict(self, data, many, **kwargs):
+        if type(data) is list:
+            return {"slot_data": data}
+        else:
+            return data
 
 doctors_schema = DoctorSchema(many=True)
 

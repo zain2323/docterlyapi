@@ -3,7 +3,7 @@ from marshmallow import validate, validates, validates_schema, ValidationError, 
 from api.models import User, Role
 from api.webadmin.schema import RoleSchema
 
-class UserSchema(ma.Schema):
+class UserSchema(ma.SQLAlchemyAutoSchema):
     """Schema defining the attributes of User"""
     class Meta:
         ordered = True
@@ -13,9 +13,9 @@ class UserSchema(ma.Schema):
     password = ma.String(reqired=True, validate=validate.Length(min=8), load_only=True)
     registered_at = ma.DateTime()
     confirmed = ma.Boolean()
+    role = ma.String(required=True)
     # dob = ma.Date(required=True)
     # gender = ma.String(required=True, validate=[validate.Length(max=8)])
-    role = ma.String(required=True)
 
     @validates("email")
     def validate_email(self, value):

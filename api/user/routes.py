@@ -5,11 +5,13 @@ from api.models import User
 from api import db, basic_auth, token_auth
 
 @users.route("/register", methods=["POST"])
-@body(UserSchema)
+@body(UserSchema(only=["name","email", "password", "role"]))
 @response(UserSchema, 201)
 def register(kwargs):
     """Registers a new user"""
+    print(kwargs)
     new_user = User(**kwargs)
+    print(new_user)
     password = kwargs["password"]
     new_user.set_password(password)
     db.session.add(new_user)

@@ -7,7 +7,38 @@ from api.patient import patient
 from api.doctor.schema import TimingsSchema
 from datetime import datetime, date , timedelta
 from api.doctor.utils import get_experience, get_patient_count
-from flask import url_for
+from flask import url_for, jsonify
+
+def cache_response_with_id(prefix):
+    def cache_it(function):
+        def inner(id):
+            CACHE_KEY = prefix + str(id)
+            if cache.has(CACHE_KEY):
+                print("CACHE HIT")
+                data = cache.get(CACHE_KEY)
+                return jsonify(data)
+            else:
+                print("CACHE MISS")
+                return function(id)
+        inner.__name__ = function.__name__
+        return inner
+    return cache_it
+
+def cache_response_with_token(prefix, token):
+    def cache_it(function):
+        def inner():
+            current_user = token.current_user()
+            CACHE_KEY  = prefix + current_user.get_token()
+            if cache.has(CACHE_KEY):
+                data = cache.get(CACHE_KEY)
+                print("CACHE HIT")
+                return jsonify(data)
+            else:
+                print("CACHE MISS")
+                return function()
+        inner.__name__ = function.__name__
+        return inner
+    return cache_it
 
 @patient.route("/new", methods=["POST"])
 @authenticate(token_auth)
@@ -22,33 +53,29 @@ def new(kwargs):
     db.session.commit()
     return new_patient
 
-@patient.route("/info", methods=["GET"])
-@authenticate(token_auth)
-@cache.cached(key_prefix="all_patients")
-@response(patients_schema, 200)
-def get_all_patients():
-    """Get all patients of the authenticated user"""
-    current_user = token_auth.current_user()
-    patients = Patient.query.filter_by(user=current_user).all()
-    return patients
-
-
 @patient.route("/all", methods=["GET"])
 @authenticate(token_auth)
+@cache_response_with_token(prefix="current_user_patients", token=token_auth)
 @response(patients_schema)
 def get_all():
     """Returns all the registered patients for the currently authenticated user"""
     current_user = token_auth.current_user()
+    CACHE_KEY = "current_user_patients" + current_user.get_token()
     patients = current_user.patient
+    cache.set(CACHE_KEY, PatientSchema(many=True).dump(patients))
     return patients
     
 @patient.route("/get/<int:id>", methods=["GET"])
 @authenticate(token_auth)
+@cache_response_with_id(prefix="patient_id")
 @response(PatientSchema)
 @other_responses({404: "Patient not found"})
 def get_patient(id):
     """Get patient by the id"""
-    return Patient.query.get_or_404(id)
+    CACHE_KEY = "patient_id" + str(id)
+    response = Patient.query.get_or_404(id)
+    cache.set(CACHE_KEY, PatientSchema().dump(response))
+    return response
 
 @patient.route("/new_appointment", methods=["POST"])
 @authenticate(token_auth)
@@ -88,10 +115,12 @@ def get_patient_appointment_time(start, diff):
 
 @patient.route("/appointment/history", methods=["GET"])
 @authenticate(token_auth)
+@cache_response_with_token(prefix="appointment_history", token=token_auth)
 @response(AppointmentHistorySchema(many=True))
 def appointment_history():
     """Returns the appointment history for the currently authenticated user"""
     current_user = token_auth.current_user()
+    CACHE_KEY = "appointment_history" + current_user.get_token()
     # Getting all the patients registered under the authenticated user
     patients = current_user.patient
     response = []
@@ -109,6 +138,7 @@ def appointment_history():
             timings = {"slot": slot, "occurring_date": occurring_date, "slots_booked": booked_slot}
             # COnstructing the final response object
             response.append({"patient": patient, "doctor": doctor, "timings": timings})
+    cache.set(CACHE_KEY, AppointmentHistorySchema(many=True).dump(response))
     return response
 
 def generate_url(filename="default_doctor_img.jpg"):

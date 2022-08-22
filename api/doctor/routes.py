@@ -11,7 +11,6 @@ from api.patient.schema import PatientSchema
 from flask import abort, request, jsonify, url_for
 from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture, get_patient_count, update_doctor_cache, does_doctor_cache_needs_update
 from werkzeug.utils import secure_filename
-from marshmallow import INCLUDE
 from math import ceil
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
