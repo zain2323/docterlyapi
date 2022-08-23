@@ -9,46 +9,12 @@ from datetime import timedelta, date, datetime, time
 from api.commands.jobs import next_weekday
 from api.patient.schema import PatientSchema
 from flask import abort, request, jsonify, url_for
-from api.doctor.utils import get_experience, generate_hex_name, save_picture, delete_picture, get_patient_count, update_doctor_cache, does_doctor_cache_needs_update
+from api.doctor.utils import (parse_qualification_body, prepare_doctor_info, get_experience, generate_hex_name,
+                             save_picture, delete_picture, get_patient_count, update_doctor_cache, 
+                             does_doctor_cache_needs_update, calculate_end_time, create_event, create_event_meta)
 from werkzeug.utils import secure_filename
 from math import ceil
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def generate_url(filename="default_doctor_img.jpg"):
-    return url_for("static", filename="doctor_profile_pics/"+filename, _external=True)
-
-def cache_response_with_id(prefix):
-    def cache_it(function):
-        def inner(id):
-            CACHE_KEY = prefix + str(id)
-            if cache.has(CACHE_KEY):
-                data = cache.get(CACHE_KEY)
-                return jsonify(data)
-            else:
-                return function(id)
-        inner.__name__ = function.__name__
-        return inner
-    return cache_it
-
-def cache_response_with_token(prefix, token):
-    def cache_it(function):
-        def inner():
-            current_user = token.current_user()
-            CACHE_KEY  = prefix + current_user.get_token()
-            if cache.has(CACHE_KEY):
-                data = cache.get(CACHE_KEY)
-                return jsonify(data)
-            else:
-                return function()
-        inner.__name__ = function.__name__
-        return inner
-    return cache_it
-
+from api.doctor.decorators import cache_response_with_id, cache_response_with_token
 
 @doctor.route("/new", methods=["POST"])
 @body(CreateNewDoctorSchema)
@@ -106,22 +72,6 @@ def get_current_doctor_info():
     doctor_info = prepare_doctor_info(doctor, qualifications_info)
     cache.set(CACHE_KEY, DoctorInfoSchema().dump(doctor_info))
     return doctor_info
-
-def prepare_doctor_info(doctor, qualifications_info):
-    user = doctor.user
-    id = doctor.id
-    description = doctor.description
-    qualifications = qualifications_info
-    try:
-        specializations = doctor.specializations[0]
-    except:
-        specializations = {}
-    experience = get_experience(qualifications)
-    url = generate_url(filename=doctor.image)
-    rating = "4.7"
-    no_of_patients = get_patient_count(doctor)
-    slot = doctor.slots
-    return {"id": id, "user": user, "description": description, "no_of_patients": no_of_patients, "rating": rating, "experience": experience, "image": url, "specializations": specializations, 'qualifications': qualifications, "slot": slot}
 
 @doctor.route("/all", methods=["GET"])
 @authenticate(token_auth)
@@ -206,12 +156,6 @@ def add_qualfications(qualifications):
     db.session.commit()
     return qualifications
 
-def parse_qualification_body(qualification_body):
-    qualifications = qualification_body["qualification_name"]
-    procurement_year = qualification_body["procurement_year"]
-    institute_name = qualification_body["institute_name"]
-    return qualifications, procurement_year, institute_name
-
 @doctor.route("/add_slot", methods=["POST"])
 @authenticate(token_auth)
 @body(CreateNewSlot)
@@ -233,28 +177,6 @@ def create_slot(kwargs):
     create_event(slot)
     db.session.commit()
     return slot
-
-def calculate_end_time(start, duration, slots):
-    diff = duration * slots
-    # Additional 20 minutes are added to avoid clash
-    end = datetime.combine(date.today(), start) + timedelta(minutes=diff+20)
-    return end.time()
-
-def create_event(slot):
-    weekday = slot.day.id
-    occurring_date = next_weekday(datetime.now().date(), weekday)
-    event = Event(occurring_date=occurring_date, slot=slot)
-    db.session.add(event)
-    create_event_meta(event)
-    booked_slots = BookedSlots(event=event)
-    db.session.add(booked_slots)
-
-def create_event_meta(event):
-    # Interval is choosen as 7
-    REPEAT_INTERVAL = 7 
-    start_date = event.occurring_date
-    event_meta = EventMeta(start_date=start_date, repeat_interval=REPEAT_INTERVAL, event=event)
-    db.session.add(event_meta)
 
 @doctor.route("/timings/<int:id>")
 @authenticate(token_auth)

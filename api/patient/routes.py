@@ -5,40 +5,10 @@ from api import token_auth, db, cache
 from apifairy import response, body, authenticate, other_responses
 from api.patient import patient
 from api.doctor.schema import TimingsSchema
-from datetime import datetime, date , timedelta
 from api.doctor.utils import get_experience, get_patient_count
 from flask import url_for, jsonify
-
-def cache_response_with_id(prefix):
-    def cache_it(function):
-        def inner(id):
-            CACHE_KEY = prefix + str(id)
-            if cache.has(CACHE_KEY):
-                print("CACHE HIT")
-                data = cache.get(CACHE_KEY)
-                return jsonify(data)
-            else:
-                print("CACHE MISS")
-                return function(id)
-        inner.__name__ = function.__name__
-        return inner
-    return cache_it
-
-def cache_response_with_token(prefix, token):
-    def cache_it(function):
-        def inner():
-            current_user = token.current_user()
-            CACHE_KEY  = prefix + current_user.get_token()
-            if cache.has(CACHE_KEY):
-                data = cache.get(CACHE_KEY)
-                print("CACHE HIT")
-                return jsonify(data)
-            else:
-                print("CACHE MISS")
-                return function()
-        inner.__name__ = function.__name__
-        return inner
-    return cache_it
+from api.patient.decorators import cache_response_with_id, cache_response_with_token
+from api.patient.utils import prepare_doctor_info, generate_url, get_patient_appointment_time
 
 @patient.route("/new", methods=["POST"])
 @authenticate(token_auth)
@@ -109,10 +79,6 @@ def create_appointment(kwargs):
     db.session.commit() 
     return response
 
-def get_patient_appointment_time(start, diff):
-    end = datetime.combine(date.today(), start) + timedelta(minutes=diff)
-    return end.time()
-
 @patient.route("/appointment/history", methods=["GET"])
 @authenticate(token_auth)
 @cache_response_with_token(prefix="appointment_history", token=token_auth)
@@ -140,18 +106,3 @@ def appointment_history():
             response.append({"patient": patient, "doctor": doctor, "timings": timings})
     cache.set(CACHE_KEY, AppointmentHistorySchema(many=True).dump(response))
     return response
-
-def generate_url(filename="default_doctor_img.jpg"):
-    return url_for("static", filename="doctor_profile_pics/"+filename, _external=True)
-
-def prepare_doctor_info(doctor):
-    user = doctor.user
-    id = doctor.id
-    description = doctor.description
-    qualifications = doctor.get_doctor_qualifications_and_info()
-    experience = get_experience(qualifications)    
-    specializations = doctor.specializations[0]
-    url = generate_url(filename=doctor.image)
-    rating = "4.7"
-    no_of_patients = get_patient_count(doctor)
-    return {"id": id, "description": description, "no_of_patients": no_of_patients, "rating": rating, "experience":experience, "image": url, "specializations": specializations, 'qualifications': qualifications,  "user": user}
