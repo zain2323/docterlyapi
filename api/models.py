@@ -119,6 +119,8 @@ class User(db.Model, UserMixin):
     
 class Doctor(db.Model):
     __tablename__ = "doctor"
+    __searchable__ = True
+    
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     description = db.Column(db.String)
     image = db.Column(db.String, nullable=False)
