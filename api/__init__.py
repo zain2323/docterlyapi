@@ -9,6 +9,8 @@ from flask_login import LoginManager
 from api.config import ProductionConfig as Config
 from flask_admin.base import AdminIndexView
 from flask_caching import Cache
+from redis_om import get_redis_connection
+from api.search.redis_search import RedisSearchApi
 
 api_fairy = APIFairy()
 db = SQLAlchemy()
@@ -21,13 +23,14 @@ login_manager = LoginManager()
 login_manager.login_view = "admin.sign_in"
 login_manager.login_message_category = "info"
 cache = Cache()
+client = get_redis_connection()
+search_api = RedisSearchApi(client)
 
 def create_app(config=Config):
     app = Flask(__name__)
     app.config.from_object(Config)
     initialize_extensions(app)
     register_blueprints(app)
-    from api import models
     return app
 
 def initialize_extensions(app):
@@ -36,6 +39,7 @@ def initialize_extensions(app):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     cache.init_app(app)
+    search_api.init_app(app)
 
     # Restricting the admin panel index route
     from flask_login import current_user

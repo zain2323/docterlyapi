@@ -1,6 +1,6 @@
 import base64
 import os
-from api import db, login_manager
+from api import db, login_manager, search_api
 from datetime import datetime, timedelta
 from werkzeug.security import check_password_hash, generate_password_hash
 from collections import OrderedDict
@@ -64,6 +64,7 @@ def load_user(user_id):
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
+    __searchable__ = ["id", "name", "email", "password", "registered_at", "confirmed", "role"]
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
@@ -116,10 +117,10 @@ class User(db.Model, UserMixin):
     
     def __repr__(self):
         return f"{self.name}, {self.email}"
-    
+
 class Doctor(db.Model):
     __tablename__ = "doctor"
-    __searchable__ = True
+    __searchable__ = ["id", "description", "image", "rating"]
     
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     description = db.Column(db.String)
@@ -143,22 +144,18 @@ class Doctor(db.Model):
     def __repr__(self):
         return f"doctor:id {self.id}"
     
-    def get_specializations(self):
-        return self.specializations.all()
-    
-    def get_qualifications(self):
-        return self.qualifications.all()
-    
     def get_user(self):
         return self.user
     
     def add_specialization(self, specialization):
         self.specializations.append(specialization)
+        search_api.add_to_index(self)
     
     def add_qualification(self, qualification, procurement_year, institute_name):
         statement = doctor_qualifications.insert().values(doctor_id=self.id, qualification_id=qualification.id,
                 procurement_year=procurement_year, institute_name=institute_name)
         db.session.execute(statement)
+        search_api.add_to_index(self)
     
     def get_doctor_qualifications_and_info(self):
         query = db.select(doctor_qualifications.c.institute_name, doctor_qualifications.c.procurement_year).filter(doctor_qualifications.c.doctor_id == self.id)
@@ -176,6 +173,30 @@ class Doctor(db.Model):
             "institute_name": institute_name_list
         }
         return info_dict
+    
+    def get_qualifications_info(self):
+        query = db.select(doctor_qualifications.c.institute_name, doctor_qualifications.c.procurement_year).filter(doctor_qualifications.c.doctor_id == self.id)
+        result = db.session.execute(query).all()
+        qualifications_list = [str(q) for q in self.qualifications]
+        procurement_year_list = []
+        institute_name_list = [] 
+        for info in result:
+            institute_name_list.append(str(info[0]))
+            procurement_year_list.append(str(info[1]))
+        
+        payload = {
+            "qualification_name": qualifications_list,
+            "procurement_year": procurement_year_list,
+            "institute_name": institute_name_list
+        }
+        return payload
+
+    def get_specializations_info(self):
+        try:
+            specialization = self.specializations[0]
+            return {"id": str(specialization.id), "name": str(specialization.name)}
+        except:
+            return {}
 
 # class Prescription(db.Model):
 #     __tablename__ = "prescription"
@@ -237,6 +258,7 @@ class Appointment(db.Model):
 
 class Slot(db.Model):
     __tablename__ = "slot"
+    __searchable__ = ["id", "day", "start", "end", "consultation_fee", "appointment_duration", "num_slots"]
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     day_id = db.Column(db.Integer, db.ForeignKey('day.id'), nullable=False, index=True)
     doctor_id = db.Column(db.Integer, db.ForeignKey("doctor.id"), nullable=False, index=True)
@@ -310,3 +332,21 @@ class EventMeta(db.Model):
 
 #     def __repr__(self):
 #         return f"Medicine: {self.medicine_name}, Dosage: {self.dosage}"
+
+
+
+def after_insert_listener(mapper, connection, target):
+    # 'target' is the inserted object
+    if isinstance(target, Slot):
+        doctor = Doctor.query.get(target.doctor_id)
+        search_api.add_to_index(doctor)
+    elif isinstance(target, Doctor):
+        search_api.add_to_index(target)
+    else: print("TARGET", target)
+
+db.event.listen(Doctor, 'after_insert', after_insert_listener)
+db.event.listen(Slot, 'after_insert', after_insert_listener)
+
+# @db.event.listens_for(Doctor.qualifications, "append")
+# def qualification_event(target, value, initiator):
+#     print("I updatedsssssssssssssssssss", target.name)

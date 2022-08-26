@@ -6,7 +6,6 @@ from api.doctor import doctor
 from api.doctor.schema import (CreateNewDoctorSchema, DoctorSchema, doctors_schema, 
     DoctorQualifications, DoctorSpecializations, DoctorInfoSchema, CreateNewSlot, ReturnSlot, TimingsSchema)
 from datetime import timedelta, date, datetime, time
-from api.commands.jobs import next_weekday
 from api.patient.schema import PatientSchema
 from flask import abort, request, jsonify, url_for
 from api.doctor.utils import (parse_qualification_body, prepare_doctor_info, get_experience, generate_hex_name,

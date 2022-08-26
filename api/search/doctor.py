@@ -1,9 +1,11 @@
-from redis_om import (JsonModel, Field, EmbeddedJsonModel)
-from typing import Optional, List
-from pydantic import EmailStr
-from datetime import datetime, date
+from datetime import date, datetime
+from typing import Any, List, Optional
 
-class User(EmbeddedJsonModel):
+from pydantic import EmailStr
+from redis_om import EmbeddedJsonModel, Field, JsonModel
+
+
+class RedisUser(EmbeddedJsonModel):
     id: int = Field(index=True)
     name: str = Field(index=True)
     email: EmailStr = Field(index=True)
@@ -12,32 +14,32 @@ class User(EmbeddedJsonModel):
     confirmed: bool = Field()
     role: str = Field()
 
-class Specialization(EmbeddedJsonModel):
-    id: int = Field(index=True)
-    name: str = Field(index=True)
-    image: str = Field()
+class RedisSpecialization(EmbeddedJsonModel):
+    id: Optional[int] = Field(index=True)
+    name: Optional[str] = Field(index=True)
+    image: Optional[str] = Field()
 
-class Qualification(EmbeddedJsonModel):
-    qualifications_name: List[str] = Field(index=True)
-    procurement_year: List[str] = Field(index=True)
-    institute_name: List[date] = Field(index=True)
+class RedisQualification(EmbeddedJsonModel):
+    qualifications_name: Optional[List[str]] = Field(index=True)
+    procurement_year: Optional[List[str]] = Field(index=True)
+    institute_name: Optional[List[str]] = Field(index=True)
 
-class Slot(EmbeddedJsonModel): 
-    id: int = Field(index=True)
-    day: str = Field(index=True)
-    start: str = Field() 
-    end: str = Field() 
-    consultation_fee: int = Field()
-    appointment_duration: int = Field()
-    num_slots: int = Field()
+class RedisSlot(EmbeddedJsonModel): 
+    id: Optional[int] = Field(index=True)
+    day: Optional[str] = Field(index=True)
+    start: Optional[str] = Field() 
+    end: Optional[str] = Field() 
+    consultation_fee: Optional[int] = Field()
+    appointment_duration: Optional[int] = Field()
+    num_slots: Optional[int] = Field()
 
-class Doctor(JsonModel):
+class RedisDoctor(JsonModel):
     id: int = Field(index=True)
-    user: User
+    user: RedisUser
     # Indexed for full text search 
     description: str = Field(index=True, full_text_search=True)
     image: str = Field()
     rating: int = Field(index=True)
-    specializations: Specialization
-    qualifications: Qualification
-    slot: Slot
+    specializations: Optional[RedisSpecialization]
+    qualifications: Optional[RedisQualification]
+    slot: Any
