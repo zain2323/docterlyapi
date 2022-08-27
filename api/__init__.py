@@ -9,8 +9,9 @@ from flask_login import LoginManager
 from api.config import ProductionConfig as Config
 from flask_admin.base import AdminIndexView
 from flask_caching import Cache
-from redis_om import get_redis_connection
+# from redis_om import get_redis_connection
 from api.search.redis_search import RedisSearchApi
+import redis
 
 api_fairy = APIFairy()
 db = SQLAlchemy()
@@ -23,7 +24,7 @@ login_manager = LoginManager()
 login_manager.login_view = "admin.sign_in"
 login_manager.login_message_category = "info"
 cache = Cache()
-client = get_redis_connection()
+client =  redis.Redis(host='redisdb', port=6379)
 search_api = RedisSearchApi(client)
 
 def create_app(config=Config):

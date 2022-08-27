@@ -1,0 +1,25 @@
+services:
+  doctorlyapi:
+    image: doctorly:latest
+    ports:
+      - 5000:5000
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://doctorlyuser:password@postgresdb:5432/doctorlydb
+      - SECRET_KEY=dd71c697dbff4274c359c1cf961043b322ebcc7036eab413c9a8620a73efde25
+    depends_on:
+      - postgresdb
+      - redisdb
+  postgresdb:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=doctorlyuser
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=doctorlydb
+  redisdb:
+    image: redis/redis-stack-server
+    ports:
+      - 6379:6379

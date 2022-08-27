@@ -47,7 +47,7 @@ six==1.16.0
 SQLAlchemy==1.4.36
 types-redis==4.3.14
 types-six==1.16.18
-typing-extensions==4.3.0
+typing_extensions==4.3.0
 webargs==8.1.0
 Werkzeug==2.1.2
 wrapt==1.14.1

@@ -1,4 +1,4 @@
-from apifairy import authenticate, response, body, only_annotate
+from apifairy import authenticate, response, body
 from api.models import Specialization, Doctor, Qualification
 from api.misc import misc
 from api import token_auth, db, cache, search_api
@@ -55,28 +55,28 @@ def get_qualifications():
 
 @misc.route("/doctors/specialization/<string:name>")
 @authenticate(token_auth)
-@only_annotate(DoctorInfoSchema)
+# @only_annotate(DoctorInfoSchema)
 def search_doctors_by_specialization(name):
     """Search doctors by specialization"""
     return jsonify(search_api.search_by_specialization(name))
 
 @misc.route("/doctors/day/<string:day>")
 @authenticate(token_auth)
-@only_annotate(DoctorInfoSchema)
+# @only_annotate(DoctorInfoSchema)
 def search_doctors_by_day(day):
     """Search doctors who are available at a particular day"""
     return jsonify(search_api.search_by_day(day))
 
 @misc.route("/doctors/name/<string:name>")
 @authenticate(token_auth)
-@only_annotate(DoctorInfoSchema)
+# @only_annotate(DoctorInfoSchema)
 def search_doctors_by_name(name):
     """Search doctor by name"""
     return jsonify(search_api.search_by_name(name))
 
 @misc.route("/doctors/qualification/<string:qualification>")
 @authenticate(token_auth)
-@only_annotate(DoctorInfoSchema)
+# @only_annotate(DoctorInfoSchema)
 def search_doctors_by_qualification(qualification):
     """Search doctor by qualification"""
     return jsonify(search_api.search_by_qualification(qualification))

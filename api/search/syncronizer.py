@@ -1,4 +1,3 @@
-from redis_om import get_redis_connection
 from api.models import Doctor
 import redis
 from redis.commands.json.path import Path
@@ -7,7 +6,8 @@ class Syncronizer:
     
     def __init__(self, model):
         self.model = model
-        self.client = get_redis_connection()
+        # self.client = get_redis_connection()
+        self.client = redis.Redis(host='redisdb', port=6379)
         self.flush()
         self.init_indexes()
 

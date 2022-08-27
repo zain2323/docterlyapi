@@ -5,14 +5,12 @@ RUN useradd doctorly
 RUN mkdir -p /home/doctorly/docterlyapi
 WORKDIR /home/doctorly/docterlyapi
 
-# COPY . /home/doctorly/docterlyapi/
-COPY api api
-COPY migrations migrations
-COPY app.py app.py
-COPY requirements.txt requirements.txt
-COPY db_dump db_dump
-COPY logs logs
-COPY secrets.json /etc/
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Copy the project files
+COPY . . 
 
 RUN python -m venv venv 
 RUN apt-get update \
@@ -21,6 +19,6 @@ RUN apt-get update \
 RUN venv/bin/pip install -r requirements.txt
 ENV FLASK_APP=app.py\
     FLASK_ENV=development
-RUN venv/bin/flask db upgrade
+# RUN venv/bin/flask db upgrade
 EXPOSE 5000
 CMD ["venv/bin/flask", "run", "--host=0.0.0.0"]
