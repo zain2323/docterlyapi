@@ -172,6 +172,23 @@ docker pull redis/redis-stack-server:latest
 ```
 docker build -t doctorly:latest .
 ```
+- Execute this command to get access to the doctorly image shell
+```
+docker exec -it  docterlyapi-doctorlyapi-1 bash
+```
+- Run migrations script to create the database tables.
+```
+venv/bin/flask db upgrade
+```
+- Open crontab
+```
+crontab -e
+# Paste this line
+* * * * * cd /home/doctorly/doctorlyapiy && venv/bin/flask commands scheduled create-scheduled-events >>scheduled.log 2>&1
+# This will automatically update the doctors next sitting date.
+# Now exit
+exit 
+```
 - Start all the containers using Docker Compose
 ```
 docker compose -f docker-compose.yaml up
@@ -186,18 +203,3 @@ docker compose down
 
 To make deploys work, you need to create free account on [Redis Cloud](https://redis.info/try-free-dev-to)
 
-### Google Cloud Run
-
-[Insert Run on Google button](https://cloud.google.com/blog/products/serverless/introducing-cloud-run-button-click-to-deploy-your-git-repos-to-google-cloud)
-
-### Heroku
-
-[Insert Deploy on Heroku button](https://devcenter.heroku.com/articles/heroku-button)
-
-### Netlify
-
-[Insert Deploy on Netlify button](https://www.netlify.com/blog/2016/11/29/introducing-the-deploy-to-netlify-button/)
-
-### Vercel
-
-[Insert Deploy on Vercel button](https://vercel.com/docs/deploy-button)

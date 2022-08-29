@@ -15,6 +15,8 @@ COPY . .
 RUN python -m venv venv 
 RUN apt-get update \
     && apt-get -y install libpq-dev gcc \
+    && apt-get -y install cron \
+    && apt-get -y install nano \
     && pip install psycopg2
 RUN venv/bin/pip install -r requirements.txt
 ENV FLASK_APP=app.py\
