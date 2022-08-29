@@ -4,19 +4,19 @@ Obtaining an appointment with a doctor for a checkup is commonly observed to be 
 
 I devised a solution to these issues. Utilizing this backend system, any client application, be it web-based or mobile can be made that provides the solution to the above issues. 
 
-#### Home Page
+### Home Page
 ![Api Home Page](/assets/doctorly_home.png)
 
-#### Register 
+### Register Page
 ![Api Register Page](/assets/doctorly_register.png)
 
-#### Sign in
+### Sign in Page
 ![Api Auth Page](/assets/doctorly_auth.png)
 
-#### Slots
+### Slots Page
 ![Api Slots Page](/assets/doctorly_slots.png)
 
-#### Redis Cached data 
+### Redis Cached data 
 ![Api cache](/assets/doctorly_cache.png)
 
 ## How it works
