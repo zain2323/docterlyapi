@@ -60,12 +60,12 @@ def upload_image():
         
 @doctor.route("/info", methods=["GET"])
 @authenticate(token_auth)
-@cache_response_with_token(prefix="current_user", token=token_auth)
+@cache_response_with_token(prefix="current_doctor", token=token_auth)
 @response(DoctorInfoSchema)
 def get_current_doctor_info():
     """Get your current info"""
     current_user = token_auth.current_user()
-    CACHE_KEY  = "current_user" + current_user.get_token()
+    CACHE_KEY  = "current_doctor" + current_user.get_token()
     doctor = Doctor.query.filter_by(user=current_user).first_or_404()
     qualifications_info = doctor.get_doctor_qualifications_and_info()
     doctor_info = prepare_doctor_info(doctor, qualifications_info)

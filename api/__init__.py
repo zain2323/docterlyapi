@@ -13,7 +13,7 @@ be time consuming and demanding. Usually, there are already boo
 ked slots and long waiting lists, so going to the hospital or clinic goes in vain. 
 A patient may be late for a new appointment for any reason, and the 
 slot may be filled by someone else.
-We devised a solution to these issues. By utilizing this API, a user can check
+I devised a solution to these issues. By utilizing this API, a user can check
 the available slots for a doctor he wishes to see, from home. The patient
 does not have to stand in long lines to learn about the doctor's expenses or
 know the free slots or to get an appointment. All of this can be done from 

@@ -2,7 +2,8 @@ from api.user import users
 from apifairy import authenticate, body, response, other_responses
 from api.user.schema import UserSchema
 from api.models import User
-from api import db, basic_auth, token_auth
+from api import db, basic_auth, token_auth, cache
+from api.user.decorators import cache_response_with_token
 
 @users.route("/register", methods=["POST"])
 @body(UserSchema(only=["name","email", "password", "role"]))
@@ -20,7 +21,11 @@ def register(kwargs):
 
 @users.route("/info", methods=["GET"])
 @authenticate(token_auth)
+@cache_response_with_token(prefix="current_user", token=token_auth)
 @response(UserSchema, 200)
 def get_account_info():
     """Get the currently authenticated user's info"""
-    return token_auth.current_user()
+    current_user = token_auth.current_user()
+    CACHE_KEY  = "current_user" + current_user.get_token()
+    cache.set(CACHE_KEY, UserSchema().dump(current_user))
+    return current_user

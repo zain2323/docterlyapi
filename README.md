@@ -4,14 +4,19 @@ Obtaining an appointment with a doctor for a checkup is commonly observed to be 
 
 I devised a solution to these issues. Utilizing this backend system, any client application, be it web-based or mobile can be made that provides the solution to the above issues. 
 
+#### Home Page
 ![Api Home Page](/assets/doctorly_home.png)
 
+#### Register 
 ![Api Register Page](/assets/doctorly_register.png)
 
+#### Sign in
 ![Api Auth Page](/assets/doctorly_auth.png)
 
+#### Slots
 ![Api Slots Page](/assets/doctorly_slots.png)
 
+#### Redis Cached data 
 ![Api cache](/assets/doctorly_cache.png)
 
 ## How it works
@@ -27,21 +32,30 @@ Let's first understand the application architecture
 ### How the data is stored:
 
 #### Primary Database
-I have used relational database to store all the data. To beter understand the relationships between different tables, take a look at the ER diagram.
+I have used relational database to store all the data. To better understand the relationships between different tables, take a look at the ER diagram.
 
 ![ER Diagram](/assets/doctorly_er.png)
 
 #### Redis As Cache
-All the cached response will be saved in the form of key value pairs.For example:
+All the cached response will be saved in the form of key value pairs.
+```
+{
+
+  "id": 1,
+  "name": "testuser",
+  "email": "testuser@example.com",
+  "password": "testing123",
+  "registered_at": "2019-08-24T14:15:22Z",
+  "confirmed": true,
+  "role": "user"
+}
 ```
 
-```
-
-#### RediJson And RediSearch
+#### Redis JSON And RediSearch
 - Search functionality is provided through the rediSearch.
 - Client applications can search the doctors by their name, qualification and specialization. 
-- In RediJson only the doctor related data is stored.
-- The data in RediJson is kept in sync with the relational database to avoid providing inaccurate results.  
+- In Redis JSON only the doctor related data is stored.
+- The data in Redis JSON is kept in sync with the relational database to avoid providing inaccurate results.  
 - Example JSON data
 ```
 {
