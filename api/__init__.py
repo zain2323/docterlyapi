@@ -1,3 +1,45 @@
+"""Welcome to the documentation for the Doctorly API Project!
+
+This project is written in Python, with the
+[Flask](https://flask.palletsprojects.com/) web framework. This documentation
+is generated automatically from the
+[project's source code](https://github.com/zain232/docterlyapi) using
+the [APIFairy](https://github.com/miguelgrinberg/apifairy) Flask extension.
+
+## Project Overview
+
+Obtaining an appointment with a doctor for a checkup is commonly observed to
+be time consuming and demanding. Usually, there are already boo
+ked slots and long waiting lists, so going to the hospital or clinic goes in vain. 
+A patient may be late for a new appointment for any reason, and the 
+slot may be filled by someone else.
+We devised a solution to these issues. By utilizing this API, a user can check
+the available slots for a doctor he wishes to see, from home. The patient
+does not have to stand in long lines to learn about the doctor's expenses or
+know the free slots or to get an appointment. All of this can be done from 
+any client application
+
+## Features
+- User registration, login and logout
+- Search functionality to search for doctors by different attributes
+- Separate endpoints for Doctor like registration and creation of profile.
+- Complete appointment history
+
+## Limitations
+- No endpoints for rating a doctor
+- Ideally, /doctors/popular/doctors endpoint should return the doctors based on their rating and some other attributes but as of current implementation returns the random doctors.
+
+## Future Expansions
+- Email recovery and password reset support
+- Real time Notifications
+- More advanced search functionality
+- A client application that consumes this API
+- Inclusion of rating endpoints
+- Patient's prescription, recommended diet plan, next appointment date
+- A robust algorithm that filters the top doctors
+- Unit testing
+"""
+
 from flask import Flask, url_for, redirect, request
 from apifairy import APIFairy
 from flask_marshmallow import Marshmallow
@@ -9,7 +51,6 @@ from flask_login import LoginManager
 from api.config import ProductionConfig as Config
 from flask_admin.base import AdminIndexView
 from flask_caching import Cache
-# from redis_om import get_redis_connection
 from api.search.redis_search import RedisSearchApi
 import redis
 

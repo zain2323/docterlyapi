@@ -34,7 +34,7 @@ def new(kwargs):
 @doctor.route("/image/", methods=["POST"])
 @authenticate(token_auth)
 def upload_image():
-    """Uploads the profile picture of the currently authenticated doctor"""
+    """Upload your profile picture"""
     current_user = token_auth.current_user()
     doctor = current_user.doctor
     if doctor == []:
@@ -63,7 +63,7 @@ def upload_image():
 @cache_response_with_token(prefix="current_user", token=token_auth)
 @response(DoctorInfoSchema)
 def get_current_doctor_info():
-    """Get the currently authenticated doctor's info"""
+    """Get your current info"""
     current_user = token_auth.current_user()
     CACHE_KEY  = "current_user" + current_user.get_token()
     doctor = Doctor.query.filter_by(user=current_user).first_or_404()
@@ -77,7 +77,7 @@ def get_current_doctor_info():
 @cache.cached(timeout=0, key_prefix="registered_doctors", forced_update=does_doctor_cache_needs_update)
 @response(DoctorInfoSchema(many=True))
 def get_all():
-    """Returns all the registered doctors"""
+    """Returns all the doctors"""
     doctors_info = []
     doctors = Doctor.query.all()
     for doctor in doctors:
@@ -107,8 +107,8 @@ def get_popular_doctors():
 @cache_response_with_id(prefix="doctor_id")
 @response(DoctorInfoSchema())
 @other_responses({404: "Doctor not found"})
-def get_doctor(id):
-    """Get doctor by the id"""
+def get_doctor(id: "The id of the doctor to retrieve"):
+    """Get doctor by id"""
     CACHE_KEY = "doctor_id" + str(id)
     doctor = Doctor.query.get_or_404(id)
     qualifications_info = doctor.get_doctor_qualifications_and_info()
@@ -181,7 +181,7 @@ def create_slot(kwargs):
 @authenticate(token_auth)
 @cache_response_with_id(prefix="doctor_sitting_date")
 @response(TimingsSchema(many=True))
-def get_doctors_next_sitting_date(id):
+def get_doctors_next_sitting_date(id: "The id of the doctor to retrieve the available timings"):
     """Return all the doctor's next sitting date with the given id"""
     CACHE_KEY = "doctor_sitting_date" + str(id)
     doctor = Doctor.query.get_or_404(id)
@@ -200,7 +200,7 @@ def get_doctors_next_sitting_date(id):
 @authenticate(token_auth)
 @cache_response_with_id(prefix="doctor_slots")
 @response(ReturnSlot(many=True))
-def get_available_slots(id):
+def get_available_slots(id: "The id of the doctor to retrieve the available slots"):
     """Return all the available slots of the doctor with the given id"""
     CACHE_KEY = "doctor_slots" + str(id)
     doctor = Doctor.query.get_or_404(id)
@@ -232,8 +232,8 @@ def get_all_patients():
 @doctor.route("/patients/<int:id>")
 @authenticate(token_auth)
 @response(PatientSchema(many=True))
-def get_appointment_patients(id):
-    """Returns all the patients of the particular appointment id of the currently authenticated doctor"""
+def get_appointment_patients(id: "The id of the appointment"):
+    """Returns all of your patients of any particular appointment"""
     current_user = token_auth.current_user()
     doctor = current_user.doctor
     if doctor == []:

@@ -28,7 +28,7 @@ def new(kwargs):
 @cache_response_with_token(prefix="current_user_patients", token=token_auth)
 @response(patients_schema)
 def get_all():
-    """Returns all the registered patients for the currently authenticated user"""
+    """Returns all the patients of the current user"""
     current_user = token_auth.current_user()
     CACHE_KEY = "current_user_patients" + current_user.get_token()
     patients = current_user.patient
@@ -40,7 +40,7 @@ def get_all():
 @cache_response_with_id(prefix="patient_id")
 @response(PatientSchema)
 @other_responses({404: "Patient not found"})
-def get_patient(id):
+def get_patient(id: "The id of the patient to retrieve"):
     """Get patient by the id"""
     CACHE_KEY = "patient_id" + str(id)
     response = Patient.query.get_or_404(id)
@@ -52,7 +52,7 @@ def get_patient(id):
 @body(AppointmentSchema)
 @response(ReturnAppointmentSchema)
 def create_appointment(kwargs):
-    """Create a new appointment for the given patient id"""
+    """Creates a new appointment"""
     user = token_auth.current_user()
     # Getting all the ids from the request body
     patient_id = kwargs["patient_id"]
@@ -84,7 +84,7 @@ def create_appointment(kwargs):
 @cache_response_with_token(prefix="appointment_history", token=token_auth)
 @response(AppointmentHistorySchema(many=True))
 def appointment_history():
-    """Returns the appointment history for the currently authenticated user"""
+    """Returns the appointment history"""
     current_user = token_auth.current_user()
     CACHE_KEY = "appointment_history" + current_user.get_token()
     # Getting all the patients registered under the authenticated user

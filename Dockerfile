@@ -19,6 +19,5 @@ RUN apt-get update \
 RUN venv/bin/pip install -r requirements.txt
 ENV FLASK_APP=app.py\
     FLASK_ENV=development
-# RUN venv/bin/flask db upgrade
 EXPOSE 5000
 CMD ["venv/bin/flask", "run", "--host=0.0.0.0"]

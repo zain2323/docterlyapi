@@ -6,6 +6,7 @@ from json import dumps
 from flask import current_app
 from faker import Faker
 
+
 @commands.cli.command()
 def create_scheduled_events():
     """Create events for the doctor's slot"""

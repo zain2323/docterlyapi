@@ -4,9 +4,9 @@ from api.models import User, Role
 from api.webadmin.schema import RoleSchema
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
-    """Schema defining the attributes of User"""
     class Meta:
         ordered = True
+        description = "This schema represents the attributes of the user"
     id = ma.Integer()
     name = ma.String(required=True, validate=[validate.Length(min=3, max=64)])
     email = ma.Email(required=True, validate=[validate.Length(max=120), validate.Email()])

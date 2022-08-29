@@ -19,7 +19,12 @@ services:
       - POSTGRES_USER=doctorlyuser
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=doctorlydb
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
   redisdb:
     image: redis/redis-stack-server
     ports:
       - 6379:6379
+volumes:
+  postgresql-data:
+    driver: local

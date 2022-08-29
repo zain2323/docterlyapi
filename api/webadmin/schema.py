@@ -9,6 +9,7 @@ def generate_url(filename="allergist.jpg"):
 class QualificationSchema(ma.Schema):
     class Meta:
         ordered = True
+        description = "This schema represents the attributes of the qualification"
     id = ma.Integer()
     name = ma.String(required=True, validate=[validate.Length(max=50)])
     
@@ -22,6 +23,7 @@ class QualificationSchema(ma.Schema):
 class SpecializationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         ordered = True
+        description = "This schema represents the attributes of the specialization"
     id = ma.Integer()
     name = ma.String(required=True, validate=[validate.Length(max=50)])
     image = ma.Url()
@@ -43,6 +45,7 @@ class RoleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Role
         ordered = True
+        description = "This schema represents the attributes of the role"
     id = ma.auto_field(dump_only=True)
     role_name = ma.auto_field(required=True, validate=[validate.Length(max=20)], dump_only=True)
 

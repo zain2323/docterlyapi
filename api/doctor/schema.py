@@ -6,6 +6,8 @@ from api.webadmin.schema import SpecializationSchema, QualificationSchema
 from api.user.schema import UserSchema
 
 class DoctorSpecializations(ma.Schema):
+    class Meta: 
+        description = 'This schema represents doctor specializations.'
     specialization_name = fields.List(fields.String(required=True, validate=[validate.Length(max=30)]))
 
     @validates("specialization_name")
@@ -19,6 +21,7 @@ class DoctorSpecializations(ma.Schema):
 class DoctorQualifications(ma.Schema):
     class Meta:
         ordered = True
+        description = 'This schema represents doctor qualifications.'
     qualification_name = fields.List(fields.String(required=True, validate=[validate.Length(max=30)]))
     procurement_year = fields.List(fields.Date(required=True))
     institute_name = fields.List(fields.String(required=True))
@@ -33,9 +36,9 @@ class DoctorQualifications(ma.Schema):
     
 
 class CreateNewDoctorSchema(ma.SQLAlchemySchema):
-    """Schema defining the attributes when registering as a doctor"""
     class Meta:
         ordered = True
+        description = 'This schema represents the attributes when registering as a doctor.'
     name = ma.String(required=True, validate=[validate.Length(min=3, max=64)])
     email = ma.String(required=True, validate=[validate.Length(max=120), validate.Email()])
     password = ma.String(reqired=True, validate=validate.Length(min=8), load_only=True)
@@ -73,10 +76,10 @@ class CreateNewDoctorSchema(ma.SQLAlchemySchema):
         return data
 
 class DoctorSchema(ma.SQLAlchemyAutoSchema):
-    """Schema defining the attributes of the doctor"""
     class Meta:
         model = Doctor
         ordered = True
+        description = "This schema represents the attributes of the doctor"
     id = ma.auto_field(dump_only=True)
     user = fields.Nested(UserSchema())
     description = ma.auto_field(required=True, dump_only=True)
@@ -94,6 +97,7 @@ class DoctorSchema(ma.SQLAlchemyAutoSchema):
 class CreateNewSlot(ma.Schema):
     class Meta:
         ordered = True
+        description = "This schema represents the attributes required when creating slot"
     day = ma.String(required=True)
     start = ma.Time(required=True)
     end = ma.Time(format="%H:%M", dump_only=True)
@@ -115,6 +119,7 @@ class CreateNewSlot(ma.Schema):
 class ReturnSlot(ma.Schema):
     class Meta:
         ordered = True
+        description = "This schema represents the attributes when slot is returned" 
     id = ma.Integer()
     day = ma.String()
     start = ma.Time(format="%H:%M")
@@ -136,7 +141,7 @@ class DoctorInfoSchema(ma.Schema):
     class Meta:
         ordered = True
         unknown = INCLUDE
-
+        description = "This schema represents the doctors information"
     id = ma.Integer()
     user = fields.Nested(UserSchema())
     description = ma.String()
@@ -158,6 +163,7 @@ class DoctorInfoSchema(ma.Schema):
 class TimingsSchema(ma.Schema):
     class Meta:
         ordered = True
+        description = "This schema represents the attributes of the available timings"
     slot = fields.Nested(ReturnSlot())
     occurring_date = ma.Date()
     slots_booked = ma.Integer()

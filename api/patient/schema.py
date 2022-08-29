@@ -5,11 +5,11 @@ from api.user.schema import UserSchema
 from api.doctor.schema import ReturnSlot, TimingsSchema, DoctorInfoSchema
 
 class PatientSchema(ma.SQLAlchemyAutoSchema):
-    """Schema defining the attributes of the patient"""
     class Meta:
         model = Patient
         ordered = True
         exclude = ("user_id",)
+        description = "This schema represents the attributes of the patient"
     id = ma.auto_field(dump_only=True)
     user_id = ma.auto_field(required=True, dump_only=True)
     name = ma.auto_field(required=True, validate=[validate.Length(max=30)])
@@ -56,6 +56,7 @@ class PatientSchema(ma.SQLAlchemyAutoSchema):
 class AppointmentSchema(ma.Schema):
     class Meta:
         ordered = True
+        description = "This schema represents the attributes required when creating appointment"        
     id = ma.Integer(dump_only=True)
     slot_id = ma.Integer(required=True)
     patient_id = ma.Integer(required=True)
@@ -99,6 +100,7 @@ class AppointmentSchema(ma.Schema):
 class ReturnAppointmentSchema(ma.Schema):
     class Meta:
         ordered = True
+        description = "This schema represents the attributes of the appointment when returned "
     id = ma.Integer()
     patient = fields.Nested(PatientSchema())
     timings = fields.Nested(TimingsSchema())

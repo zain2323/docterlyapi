@@ -56,34 +56,34 @@ def get_qualifications():
 @misc.route("/doctors/specialization/<string:name>")
 @authenticate(token_auth)
 # @only_annotate(DoctorInfoSchema)
-def search_doctors_by_specialization(name):
+def search_doctors_by_specialization(name: "The name of the specialization to search"):
     """Search doctors by specialization"""
     return jsonify(search_api.search_by_specialization(name))
 
 @misc.route("/doctors/day/<string:day>")
 @authenticate(token_auth)
 # @only_annotate(DoctorInfoSchema)
-def search_doctors_by_day(day):
+def search_doctors_by_day(day: "The name of the day to search"):
     """Search doctors who are available at a particular day"""
     return jsonify(search_api.search_by_day(day))
 
 @misc.route("/doctors/name/<string:name>")
 @authenticate(token_auth)
 # @only_annotate(DoctorInfoSchema)
-def search_doctors_by_name(name):
+def search_doctors_by_name(name: "The name of the doctor to search"):
     """Search doctor by name"""
     return jsonify(search_api.search_by_name(name))
 
 @misc.route("/doctors/qualification/<string:qualification>")
 @authenticate(token_auth)
 # @only_annotate(DoctorInfoSchema)
-def search_doctors_by_qualification(qualification):
+def search_doctors_by_qualification(qualification: "The name of the qualification to search"):
     """Search doctor by qualification"""
     return jsonify(search_api.search_by_qualification(qualification))
 
 @misc.route("/image/<int:specialization_id>", methods=["POST"])
 @authenticate(token_auth)
-def upload_image(specialization_id):
+def upload_image(specialization_id: "The id of the specialization"):
     """Uploads the specialization picture with the given id"""
     specialization = Specialization.query.get(specialization_id)
     if specialization is None:
